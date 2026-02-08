@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>三国志新戦 部隊編成ツール</title>
+    <title>三国志新戦 部隊編成ツール v2</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -155,6 +155,70 @@
             font-family: inherit;
         }
 
+        .search-select-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 2px solid #8e44ad;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-option {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .search-option:hover {
+            background: #f8f9fa;
+        }
+
+        .search-option:last-child {
+            border-bottom: none;
+        }
+
+        .selected-value {
+            padding: 8px 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
         .soldier-types {
             display: flex;
             gap: 8px;
@@ -202,10 +266,6 @@
 
         .commander-slot {
             margin-bottom: 12px;
-        }
-
-        .commander-select {
-            margin-bottom: 8px;
         }
 
         .aptitude-badge {
@@ -302,6 +362,20 @@
             background: #c82333;
         }
 
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:active {
+            background: #218838;
+        }
+
+        .save-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
         .saved-formation-card {
             background: white;
             border-radius: 12px;
@@ -365,8 +439,15 @@
 
         .mini-commander {
             font-size: 12px;
-            color: #6c757d;
+            color: #495057;
             margin-left: 8px;
+            margin-bottom: 3px;
+        }
+
+        .mini-strategy {
+            font-size: 11px;
+            color: #6c757d;
+            margin-left: 16px;
         }
 
         .action-buttons {
@@ -413,10 +494,6 @@
             background: #dc3545;
         }
 
-        select option {
-            padding: 8px;
-        }
-
         .internal-commanders {
             display: grid;
             gap: 12px;
@@ -435,13 +512,54 @@
             color: #495057;
             margin-bottom: 8px;
         }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 16px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
+        const { useState, useEffect, useCallback, useRef } = React;
 
         const SHEET_ID = '1s3q3t9Hk_LuVLnGLSFmPhcF8PjUILy8-CvBXWBtaSvI';
         
@@ -452,6 +570,7 @@
             const [formations, setFormations] = useState([]);
             const [loading, setLoading] = useState(true);
             const [syncStatus, setSyncStatus] = useState('未同期');
+            const [editingFormationId, setEditingFormationId] = useState(null);
             
             // 編成データ
             const [formationName, setFormationName] = useState('');
@@ -522,17 +641,44 @@
                     
                     setStrategies(strategiesData);
 
-                    // LocalStorageから編成データを読み込み
-                    const savedFormations = localStorage.getItem('formations');
-                    if (savedFormations) {
-                        setFormations(JSON.parse(savedFormations));
+                    // 編成データ読み込み
+                    try {
+                        const formationsUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=編成`;
+                        const formationsResponse = await fetch(formationsUrl);
+                        const formationsText = await formationsResponse.text();
+                        const formationsParsed = Papa.parse(formationsText, { header: true });
+                        
+                        const formationsData = formationsParsed.data
+                            .filter(row => row['編成名'] && row['編成名'].trim())
+                            .map((row, index) => {
+                                try {
+                                    return {
+                                        id: index,
+                                        name: row['編成名'],
+                                        date: row['作成日'],
+                                        pvpTeams: JSON.parse(row['対人戦部隊'] || '[]'),
+                                        siegeTeams: JSON.parse(row['攻城部隊'] || '[]'),
+                                        internalCommanders: JSON.parse(row['内政武将'] || '[]'),
+                                        memo: row['メモ'] || ''
+                                    };
+                                } catch (e) {
+                                    console.error('編成データのパースエラー:', e);
+                                    return null;
+                                }
+                            })
+                            .filter(f => f !== null);
+                        
+                        setFormations(formationsData);
+                    } catch (e) {
+                        console.log('編成シートが存在しないか、読み込みエラー');
+                        setFormations([]);
                     }
 
                     setSyncStatus('同期完了');
                     setTimeout(() => setSyncStatus(''), 2000);
                 } catch (error) {
                     console.error('データ読み込みエラー:', error);
-                    setSyncStatus('エラー');
+                    setSyncStatus('エラー: ' + error.message);
                 }
                 
                 setLoading(false);
@@ -601,13 +747,64 @@
                 };
             };
 
-            // 編成保存
-            const saveFormation = async () => {
+            // スプレッドシートに保存
+            const saveToSheet = async (formationData, isUpdate = false) => {
+                try {
+                    setSyncStatus('保存中...');
+                    
+                    // Google Apps Scriptのウェブアプリエンドポイントを使用
+                    // 注: 実際に使用する前にGoogle Apps Scriptを設定する必要があります
+                    const scriptUrl = 'https://script.google.com/macros/s/AKfycby7oGuBXMaOyreSIKKEYa8f3OL6r4pHdz1CvRNPnte3fUW6dqA7_1-eQwpz-D7Tw7Ys3A/exec'; // ここにGoogle Apps ScriptのURLを設定
+                    
+                    const response = await fetch(scriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: isUpdate ? 'update' : 'create',
+                            formationId: isUpdate ? editingFormationId : null,
+                            data: {
+                                name: formationData.name,
+                                date: formationData.date,
+                                pvpTeams: JSON.stringify(formationData.pvpTeams),
+                                siegeTeams: JSON.stringify(formationData.siegeTeams),
+                                internalCommanders: JSON.stringify(formationData.internalCommanders),
+                                memo: formationData.memo
+                            }
+                        })
+                    });
+                    
+                    setSyncStatus('保存完了');
+                    setTimeout(() => setSyncStatus(''), 2000);
+                    
+                    // データを再読み込み
+                    await loadData();
+                    
+                } catch (error) {
+                    console.error('保存エラー:', error);
+                    setSyncStatus('保存エラー');
+                }
+            };
+
+            // 編成保存（モーダル表示）
+            const [showSaveModal, setShowSaveModal] = useState(false);
+
+            const handleSaveClick = () => {
                 if (!formationName.trim()) {
                     alert('編成名を入力してください');
                     return;
                 }
+                
+                if (editingFormationId !== null) {
+                    setShowSaveModal(true);
+                } else {
+                    saveAsNew();
+                }
+            };
 
+            const saveAsNew = async () => {
                 const formationData = {
                     name: formationName,
                     date: new Date().toISOString().split('T')[0],
@@ -617,33 +814,91 @@
                     memo
                 };
 
-                const saved = [...formations, formationData];
-                setFormations(saved);
-                localStorage.setItem('formations', JSON.stringify(saved));
-                
-                alert('編成を保存しました！');
-                
-                // フォームリセット
+                await saveToSheet(formationData, false);
+                setShowSaveModal(false);
+                setEditingFormationId(null);
+                resetForm();
+                alert('新規編成として保存しました！');
+            };
+
+            const saveOverwrite = async () => {
+                const formationData = {
+                    name: formationName,
+                    date: new Date().toISOString().split('T')[0],
+                    pvpTeams,
+                    siegeTeams,
+                    internalCommanders,
+                    memo
+                };
+
+                await saveToSheet(formationData, true);
+                setShowSaveModal(false);
+                setEditingFormationId(null);
+                resetForm();
+                alert('編成を上書き保存しました！');
+            };
+
+            const resetForm = () => {
                 setFormationName('');
                 setMemo('');
+                setPvpTeams(Array(5).fill(null).map(() => ({
+                    soldierType: '槍',
+                    commanders: Array(3).fill(null).map(() => ({
+                        commanderId: '',
+                        strategies: ['', '']
+                    }))
+                })));
+                setSiegeTeams(Array(5).fill(null).map(() => ({
+                    soldierType: '兵器',
+                    commanders: Array(3).fill(null).map(() => ({
+                        commanderId: '',
+                        strategies: ['', '']
+                    }))
+                })));
+                setInternalCommanders(Array(10).fill(null).map(() => ({
+                    commanderId: '',
+                    strategies: ['', '']
+                })));
             };
 
             // 編成読み込み
             const loadFormation = (formation) => {
+                setEditingFormationId(formation.id);
                 setFormationName(formation.name);
-                setPvpTeams(formation.pvpTeams);
-                setSiegeTeams(formation.siegeTeams);
-                setInternalCommanders(formation.internalCommanders);
+                setPvpTeams(formation.pvpTeams || []);
+                setSiegeTeams(formation.siegeTeams || []);
+                setInternalCommanders(formation.internalCommanders || []);
                 setMemo(formation.memo || '');
                 setActiveTab('pvp');
             };
 
             // 編成削除
-            const deleteFormation = (index) => {
-                if (confirm('この編成を削除しますか？')) {
-                    const updated = formations.filter((_, i) => i !== index);
-                    setFormations(updated);
-                    localStorage.setItem('formations', JSON.stringify(updated));
+            const deleteFormation = async (formationId) => {
+                if (!confirm('この編成を削除しますか？')) return;
+                
+                try {
+                    setSyncStatus('削除中...');
+                    
+                    const scriptUrl = 'https://script.google.com/macros/s/AKfycby7oGuBXMaOyreSIKKEYa8f3OL6r4pHdz1CvRNPnte3fUW6dqA7_1-eQwpz-D7Tw7Ys3A/exec';
+                    await fetch(scriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'delete',
+                            formationId: formationId
+                        })
+                    });
+                    
+                    setSyncStatus('削除完了');
+                    setTimeout(() => setSyncStatus(''), 2000);
+                    await loadData();
+                    
+                } catch (error) {
+                    console.error('削除エラー:', error);
+                    setSyncStatus('削除エラー');
                 }
             };
 
@@ -652,7 +907,7 @@
                     <div className="app-container">
                         <div className="header">
                             <h1>⚔️ 三国志新戦</h1>
-                            <p>部隊編成ツール</p>
+                            <p>部隊編成ツール v2</p>
                         </div>
                         <div className="loading">
                             <div>データを読み込み中...</div>
@@ -665,9 +920,9 @@
                 <div className="app-container">
                     <div className="header">
                         <h1>⚔️ 三国志新戦</h1>
-                        <p>部隊編成ツール</p>
+                        <p>部隊編成ツール v2</p>
                         <div className="sync-status">
-                            <span className={`status-indicator ${syncStatus === '読み込み中...' ? 'status-loading' : syncStatus === '同期完了' ? 'status-success' : syncStatus === 'エラー' ? 'status-error' : ''}`}></span>
+                            <span className={`status-indicator ${syncStatus === '読み込み中...' || syncStatus === '保存中...' ? 'status-loading' : syncStatus.includes('完了') ? 'status-success' : syncStatus.includes('エラー') ? 'status-error' : ''}`}></span>
                             {syncStatus || 'スタンバイ'}
                             <button className="sync-btn" onClick={loadData}>
                                 🔄 再読込
@@ -736,6 +991,8 @@
                         {activeTab === 'saved' && (
                             <SavedFormations 
                                 formations={formations}
+                                commanders={commanders}
+                                strategies={strategies}
                                 loadFormation={loadFormation}
                                 deleteFormation={deleteFormation}
                             />
@@ -744,7 +1001,9 @@
                         {activeTab !== 'saved' && (
                             <div className="section">
                                 <div className="input-group">
-                                    <label className="input-label">編成名</label>
+                                    <label className="input-label">
+                                        編成名 {editingFormationId !== null && '(編集中)'}
+                                    </label>
                                     <input 
                                         type="text"
                                         value={formationName}
@@ -760,12 +1019,116 @@
                                         placeholder="編成のコンセプトや注意点など"
                                     />
                                 </div>
-                                <button className="btn" onClick={saveFormation}>
+                                <button className="btn" onClick={handleSaveClick}>
                                     💾 編成を保存
                                 </button>
+                                {editingFormationId !== null && (
+                                    <button className="btn btn-secondary" onClick={() => {
+                                        setEditingFormationId(null);
+                                        resetForm();
+                                    }}>
+                                        ✕ 編集をキャンセル
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
+
+                    {showSaveModal && (
+                        <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">保存方法を選択</div>
+                                <div className="modal-text">
+                                    既存の編成を編集中です。上書き保存しますか？それとも新規編成として保存しますか？
+                                </div>
+                                <div className="modal-buttons">
+                                    <button className="btn btn-success" onClick={saveOverwrite}>
+                                        上書き保存
+                                    </button>
+                                    <button className="btn" onClick={saveAsNew}>
+                                        新規保存
+                                    </button>
+                                </div>
+                                <button className="btn btn-secondary" style={{marginTop: '10px'}} onClick={() => setShowSaveModal(false)}>
+                                    キャンセル
+                                    </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // 検索可能なセレクトコンポーネント
+        function SearchableSelect({ value, onChange, options, placeholder, renderOption, renderValue }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [isOpen, setIsOpen] = useState(false);
+            const containerRef = useRef(null);
+
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (containerRef.current && !containerRef.current.contains(event.target)) {
+                        setIsOpen(false);
+                    }
+                };
+
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
+
+            const filteredOptions = options.filter(option => 
+                renderOption(option).toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            const selectedOption = options.find(opt => opt.id === parseInt(value));
+
+            return (
+                <div className="search-select-container" ref={containerRef}>
+                    {selectedOption ? (
+                        <div className="selected-value">
+                            {renderValue ? renderValue(selectedOption) : renderOption(selectedOption)}
+                            <button 
+                                className="clear-btn" 
+                                onClick={() => {
+                                    onChange('');
+                                    setSearchTerm('');
+                                }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <input
+                                type="text"
+                                className="search-input"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setIsOpen(true);
+                                }}
+                                onFocus={() => setIsOpen(true)}
+                                placeholder={placeholder}
+                            />
+                            {isOpen && filteredOptions.length > 0 && (
+                                <div className="search-dropdown">
+                                    {filteredOptions.map(option => (
+                                        <div
+                                            key={option.id}
+                                            className="search-option"
+                                            onClick={() => {
+                                                onChange(option.id.toString());
+                                                setSearchTerm('');
+                                                setIsOpen(false);
+                                            }}
+                                        >
+                                            {renderOption(option)}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             );
         }
@@ -822,48 +1185,40 @@
                                                 武将 {commanderIndex + 1}
                                                 {commanderIndex === 0 && ' (主将)'}
                                             </label>
-                                            <select
-                                                className="commander-select"
+                                            <SearchableSelect
                                                 value={commander.commanderId}
-                                                onChange={(e) => updateCommander(teamIndex, commanderIndex, 'commanderId', e.target.value)}
-                                            >
-                                                <option value="">選択してください</option>
-                                                {commanders.map(cmd => (
-                                                    <option key={cmd.id} value={cmd.id}>
-                                                        {cmd.name} [{cmd.faction}] ★{cmd.stars}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {commander.commanderId && (() => {
-                                                const cmd = commanders.find(c => c.id === parseInt(commander.commanderId));
-                                                if (!cmd) return null;
-                                                const aptKey = team.soldierType === '槍' ? 'spear' : 
-                                                              team.soldierType === '弓' ? 'bow' :
-                                                              team.soldierType === '馬' ? 'cavalry' : 'shield';
-                                                const apt = cmd[aptKey];
-                                                return (
-                                                    <span className={`aptitude-badge aptitude-${apt}`}>
-                                                        {team.soldierType}適性: {apt}
-                                                    </span>
-                                                );
-                                            })()}
+                                                onChange={(value) => updateCommander(teamIndex, commanderIndex, 'commanderId', value)}
+                                                options={commanders}
+                                                placeholder="武将を検索..."
+                                                renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
+                                                renderValue={(cmd) => {
+                                                    const aptKey = team.soldierType === '槍' ? 'spear' : 
+                                                                  team.soldierType === '弓' ? 'bow' :
+                                                                  team.soldierType === '馬' ? 'cavalry' : 'shield';
+                                                    const apt = cmd[aptKey];
+                                                    return (
+                                                        <>
+                                                            {cmd.name} [{cmd.faction}] ★{cmd.stars}
+                                                            <span className={`aptitude-badge aptitude-${apt}`}>
+                                                                {team.soldierType}: {apt}
+                                                            </span>
+                                                        </>
+                                                    );
+                                                }}
+                                            />
                                         </div>
 
                                         <div className="strategy-slots">
                                             {commander.strategies.map((strategyId, strategyIndex) => (
                                                 <div key={strategyIndex} className="strategy-slot">
                                                     <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                                    <select
+                                                    <SearchableSelect
                                                         value={strategyId}
-                                                        onChange={(e) => updateStrategy(teamIndex, commanderIndex, strategyIndex, e.target.value)}
-                                                    >
-                                                        <option value="">選択してください</option>
-                                                        {strategies.map(strat => (
-                                                            <option key={strat.id} value={strat.id}>
-                                                                {strat.name} [{strat.type}] (学習{strat.maxLearns}回)
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                        onChange={(value) => updateStrategy(teamIndex, commanderIndex, strategyIndex, value)}
+                                                        options={strategies}
+                                                        placeholder="戦法を検索..."
+                                                        renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
+                                                    />
                                                     {strategyId && (() => {
                                                         const validation = validateStrategy(strategyId);
                                                         if (!validation.valid) {
@@ -919,44 +1274,34 @@
                                                 武将 {commanderIndex + 1}
                                                 {commanderIndex === 0 && ' (主将)'}
                                             </label>
-                                            <select
-                                                className="commander-select"
+                                            <SearchableSelect
                                                 value={commander.commanderId}
-                                                onChange={(e) => updateCommander(teamIndex, commanderIndex, 'commanderId', e.target.value)}
-                                            >
-                                                <option value="">選択してください</option>
-                                                {commanders.map(cmd => (
-                                                    <option key={cmd.id} value={cmd.id}>
+                                                onChange={(value) => updateCommander(teamIndex, commanderIndex, 'commanderId', value)}
+                                                options={commanders}
+                                                placeholder="武将を検索..."
+                                                renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
+                                                renderValue={(cmd) => (
+                                                    <>
                                                         {cmd.name} [{cmd.faction}] ★{cmd.stars}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {commander.commanderId && (() => {
-                                                const cmd = commanders.find(c => c.id === parseInt(commander.commanderId));
-                                                if (!cmd) return null;
-                                                return (
-                                                    <span className={`aptitude-badge aptitude-${cmd.siege}`}>
-                                                        兵器適性: {cmd.siege}
-                                                    </span>
-                                                );
-                                            })()}
+                                                        <span className={`aptitude-badge aptitude-${cmd.siege}`}>
+                                                            兵器: {cmd.siege}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            />
                                         </div>
 
                                         <div className="strategy-slots">
                                             {commander.strategies.map((strategyId, strategyIndex) => (
                                                 <div key={strategyIndex} className="strategy-slot">
                                                     <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                                    <select
+                                                    <SearchableSelect
                                                         value={strategyId}
-                                                        onChange={(e) => updateStrategy(teamIndex, commanderIndex, strategyIndex, e.target.value)}
-                                                    >
-                                                        <option value="">選択してください</option>
-                                                        {strategies.map(strat => (
-                                                            <option key={strat.id} value={strat.id}>
-                                                                {strat.name} [{strat.type}] (学習{strat.maxLearns}回)
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                        onChange={(value) => updateStrategy(teamIndex, commanderIndex, strategyIndex, value)}
+                                                        options={strategies}
+                                                        placeholder="戦法を検索..."
+                                                        renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
+                                                    />
                                                     {strategyId && (() => {
                                                         const validation = validateStrategy(strategyId);
                                                         if (!validation.valid) {
@@ -1004,34 +1349,26 @@
                                 
                                 <div className="input-group">
                                     <label className="input-label">武将</label>
-                                    <select
+                                    <SearchableSelect
                                         value={commander.commanderId}
-                                        onChange={(e) => updateCommander(index, 'commanderId', e.target.value)}
-                                    >
-                                        <option value="">選択してください</option>
-                                        {commanders.map(cmd => (
-                                            <option key={cmd.id} value={cmd.id}>
-                                                {cmd.name} [{cmd.faction}] ★{cmd.stars}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(value) => updateCommander(index, 'commanderId', value)}
+                                        options={commanders}
+                                        placeholder="武将を検索..."
+                                        renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
+                                    />
                                 </div>
 
                                 <div className="strategy-slots">
                                     {commander.strategies.map((strategyId, strategyIndex) => (
                                         <div key={strategyIndex} className="strategy-slot">
                                             <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                            <select
+                                            <SearchableSelect
                                                 value={strategyId}
-                                                onChange={(e) => updateStrategy(index, strategyIndex, e.target.value)}
-                                            >
-                                                <option value="">選択してください</option>
-                                                {strategies.map(strat => (
-                                                    <option key={strat.id} value={strat.id}>
-                                                        {strat.name} [{strat.type}] (学習{strat.maxLearns}回)
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                onChange={(value) => updateStrategy(index, strategyIndex, value)}
+                                                options={strategies}
+                                                placeholder="戦法を検索..."
+                                                renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
+                                            />
                                             {strategyId && (() => {
                                                 const validation = validateStrategy(strategyId);
                                                 if (!validation.valid) {
@@ -1054,7 +1391,7 @@
             );
         }
 
-        function SavedFormations({ formations, loadFormation, deleteFormation }) {
+        function SavedFormations({ formations, commanders, strategies, loadFormation, deleteFormation }) {
             if (formations.length === 0) {
                 return (
                     <div className="empty-state">
@@ -1066,6 +1403,16 @@
                     </div>
                 );
             }
+
+            const getCommanderName = (commanderId) => {
+                const commander = commanders.find(c => c.id === parseInt(commanderId));
+                return commander ? commander.name : '未設定';
+            };
+
+            const getStrategyName = (strategyId) => {
+                const strategy = strategies.find(s => s.id === parseInt(strategyId));
+                return strategy ? strategy.name : '未設定';
+            };
 
             return (
                 <div className="section">
@@ -1107,8 +1454,18 @@
                                             {team.commanders.map((commander, cmdIndex) => {
                                                 if (!commander.commanderId) return null;
                                                 return (
-                                                    <div key={cmdIndex} className="mini-commander">
-                                                        • 武将{cmdIndex + 1}
+                                                    <div key={cmdIndex}>
+                                                        <div className="mini-commander">
+                                                            • {getCommanderName(commander.commanderId)}
+                                                        </div>
+                                                        {commander.strategies.map((strategyId, sIndex) => {
+                                                            if (!strategyId) return null;
+                                                            return (
+                                                                <div key={sIndex} className="mini-strategy">
+                                                                    └ {getStrategyName(strategyId)}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 );
                                             })}
@@ -1131,8 +1488,18 @@
                                             {team.commanders.map((commander, cmdIndex) => {
                                                 if (!commander.commanderId) return null;
                                                 return (
-                                                    <div key={cmdIndex} className="mini-commander">
-                                                        • 武将{cmdIndex + 1}
+                                                    <div key={cmdIndex}>
+                                                        <div className="mini-commander">
+                                                            • {getCommanderName(commander.commanderId)}
+                                                        </div>
+                                                        {commander.strategies.map((strategyId, sIndex) => {
+                                                            if (!strategyId) return null;
+                                                            return (
+                                                                <div key={sIndex} className="mini-strategy">
+                                                                    └ {getStrategyName(strategyId)}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 );
                                             })}
@@ -1143,15 +1510,29 @@
 
                             <div className="formation-section">
                                 <div className="formation-section-title">内政武将</div>
-                                <div className="mini-team">
-                                    {formation.internalCommanders && formation.internalCommanders.filter(c => c.commanderId).length > 0 ? (
-                                        <div className="mini-commander">
-                                            {formation.internalCommanders.filter(c => c.commanderId).length}人設定済み
+                                {formation.internalCommanders && formation.internalCommanders.map((commander, cmdIndex) => {
+                                    if (!commander.commanderId) return null;
+                                    return (
+                                        <div key={cmdIndex} className="mini-team">
+                                            <div className="mini-commander">
+                                                • {getCommanderName(commander.commanderId)}
+                                            </div>
+                                            {commander.strategies.map((strategyId, sIndex) => {
+                                                if (!strategyId) return null;
+                                                return (
+                                                    <div key={sIndex} className="mini-strategy">
+                                                        └ {getStrategyName(strategyId)}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                    ) : (
+                                    );
+                                })}
+                                {(!formation.internalCommanders || formation.internalCommanders.filter(c => c.commanderId).length === 0) && (
+                                    <div className="mini-team">
                                         <div className="mini-commander" style={{color: '#adb5bd'}}>未設定</div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="action-buttons">
@@ -1163,7 +1544,7 @@
                                 </button>
                                 <button 
                                     className="btn btn-danger"
-                                    onClick={() => deleteFormation(index)}
+                                    onClick={() => deleteFormation(formation.id)}
                                 >
                                     🗑️ 削除
                                 </button>
