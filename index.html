@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>三国志新戦 部隊編成ツール v2</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>三国志新戦 部隊編成ツール v3.0</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -17,7 +18,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             min-height: 100vh;
             overflow-x: hidden;
@@ -151,7 +152,7 @@
 
         textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 60px;
             font-family: inherit;
         }
 
@@ -194,19 +195,16 @@
             background: #f8f9fa;
         }
 
-        .search-option:last-child {
-            border-bottom: none;
-        }
-
         .selected-value {
             padding: 8px 12px;
             background: #e9ecef;
             border-radius: 6px;
             font-size: 14px;
             margin-top: 6px;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .clear-btn {
@@ -217,6 +215,7 @@
             border-radius: 4px;
             font-size: 12px;
             cursor: pointer;
+            margin-left: auto;
         }
 
         .soldier-types {
@@ -264,6 +263,15 @@
             border-bottom: 2px solid #dee2e6;
         }
 
+        .team-memo {
+            background: #e8f5e9;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #2e7d32;
+            margin-bottom: 12px;
+        }
+
         .commander-slot {
             margin-bottom: 12px;
         }
@@ -293,8 +301,23 @@
             margin-bottom: 8px;
         }
 
-        .strategy-slot:last-child {
-            margin-bottom: 0;
+        .tactics-section {
+            margin-top: 12px;
+            padding: 12px;
+            background: #fff8e1;
+            border-radius: 6px;
+            border: 2px solid #ffc107;
+        }
+
+        .tactics-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .tactics-slot {
+            margin-bottom: 8px;
         }
 
         .strategy-warning {
@@ -327,6 +350,17 @@
             margin-top: 4px;
         }
 
+        .duplicate-error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
         .btn {
             width: 100%;
             padding: 14px;
@@ -350,30 +384,12 @@
             background: #6c757d;
         }
 
-        .btn-secondary:active {
-            background: #5a6268;
-        }
-
         .btn-danger {
             background: #dc3545;
         }
 
-        .btn-danger:active {
-            background: #c82333;
-        }
-
         .btn-success {
             background: #28a745;
-        }
-
-        .btn-success:active {
-            background: #218838;
-        }
-
-        .save-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
         }
 
         .saved-formation-card {
@@ -382,13 +398,11 @@
             padding: 16px;
             margin-bottom: 16px;
             border: 2px solid #dee2e6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .formation-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
             margin-bottom: 12px;
         }
 
@@ -398,31 +412,6 @@
             color: #2c3e50;
         }
 
-        .formation-date {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
-        .formation-section {
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .formation-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .formation-section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #6c757d;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
         .mini-team {
             background: #f8f9fa;
             padding: 10px;
@@ -430,21 +419,13 @@
             margin-bottom: 8px;
         }
 
-        .mini-team-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 6px;
-        }
-
         .mini-commander {
             font-size: 12px;
             color: #495057;
             margin-left: 8px;
-            margin-bottom: 3px;
         }
 
-        .mini-strategy {
+        .mini-strategy, .mini-tactics {
             font-size: 11px;
             color: #6c757d;
             margin-left: 16px;
@@ -461,56 +442,6 @@
             text-align: center;
             padding: 40px;
             color: #6c757d;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .status-loading {
-            background: #ffc107;
-        }
-
-        .status-success {
-            background: #28a745;
-        }
-
-        .status-error {
-            background: #dc3545;
-        }
-
-        .internal-commanders {
-            display: grid;
-            gap: 12px;
-        }
-
-        .internal-card {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-
-        .internal-card-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 8px;
         }
 
         .modal-overlay {
@@ -553,6 +484,14 @@
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
+        .internal-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -562,45 +501,50 @@
         const { useState, useEffect, useCallback, useRef } = React;
 
         const SHEET_ID = '1s3q3t9Hk_LuVLnGLSFmPhcF8PjUILy8-CvBXWBtaSvI';
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
         
         function App() {
             const [activeTab, setActiveTab] = useState('pvp');
             const [commanders, setCommanders] = useState([]);
             const [strategies, setStrategies] = useState([]);
+            const [tactics, setTactics] = useState({ slot1: [], slot2Map: {}, slot34Map: {} });
             const [formations, setFormations] = useState([]);
             const [loading, setLoading] = useState(true);
             const [syncStatus, setSyncStatus] = useState('未同期');
             const [editingFormationId, setEditingFormationId] = useState(null);
             
-            // 編成データ
             const [formationName, setFormationName] = useState('');
             const [pvpTeams, setPvpTeams] = useState(Array(5).fill(null).map(() => ({
                 soldierType: '槍',
+                memo: '',
                 commanders: Array(3).fill(null).map(() => ({
-                    commanderId: '',
-                    strategies: ['', '']
+                    commanderName: '',
+                    strategies: ['', ''],
+                    tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
                 }))
             })));
             const [siegeTeams, setSiegeTeams] = useState(Array(5).fill(null).map(() => ({
                 soldierType: '兵器',
+                memo: '',
                 commanders: Array(3).fill(null).map(() => ({
-                    commanderId: '',
-                    strategies: ['', '']
+                    commanderName: '',
+                    strategies: ['', ''],
+                    tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
                 }))
             })));
             const [internalCommanders, setInternalCommanders] = useState(Array(10).fill(null).map(() => ({
-                commanderId: '',
-                strategies: ['', '']
+                commanderName: '',
+                strategies: ['', ''],
+                tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
             })));
             const [memo, setMemo] = useState('');
 
-            // データ読み込み
             const loadData = useCallback(async () => {
                 setLoading(true);
                 setSyncStatus('読み込み中...');
                 
                 try {
-                    // 武将データ読み込み
+                    // 武将データ
                     const commandersUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=武将一覧`;
                     const commandersResponse = await fetch(commandersUrl);
                     const commandersText = await commandersResponse.text();
@@ -608,8 +552,7 @@
                     
                     const commandersData = commandersParsed.data
                         .filter(row => row['武将名'] && row['武将名'].trim())
-                        .map((row, index) => ({
-                            id: index,
+                        .map(row => ({
                             name: row['武将名'],
                             faction: row['陣営'] || '',
                             stars: parseInt(row['凸数']) || 0,
@@ -622,7 +565,7 @@
                     
                     setCommanders(commandersData);
 
-                    // 戦法データ読み込み
+                    // 戦法データ
                     const strategiesUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=戦法一覧`;
                     const strategiesResponse = await fetch(strategiesUrl);
                     const strategiesText = await strategiesResponse.text();
@@ -630,18 +573,49 @@
                     
                     const strategiesData = strategiesParsed.data
                         .filter(row => row['戦法名'] && row['戦法名'].trim())
-                        .map((row, index) => ({
-                            id: index,
+                        .map(row => ({
                             name: row['戦法名'],
                             type: row['種類'] || '',
-                            maxLearns: parseInt(row['学習数']) || 1,
-                            learned: row['学習済み'] === 'TRUE' || row['学習済み'] === '○',
-                            effect: row['効果'] || ''
+                            maxLearns: parseInt(row['学習数']) || 1
                         }));
                     
                     setStrategies(strategiesData);
 
-                    // 編成データ読み込み
+                    // 兵法データ
+                    const tacticsUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=兵法一覧`;
+                    const tacticsResponse = await fetch(tacticsUrl);
+                    const tacticsText = await tacticsResponse.text();
+                    const tacticsParsed = Papa.parse(tacticsText, { header: false });
+                    
+                    const tacticsData = { slot1: [], slot2Map: {}, slot34Map: {} };
+                    
+                    tacticsParsed.data.forEach(row => {
+                        const slot1Value = row[0];
+                        if (slot1Value && slot1Value !== '第1スロット' && !tacticsData.slot1.includes(slot1Value)) {
+                            tacticsData.slot1.push(slot1Value);
+                            tacticsData.slot2Map[slot1Value] = [];
+                            tacticsData.slot34Map[slot1Value] = [];
+                        }
+                    });
+
+                    tacticsParsed.data.forEach(row => {
+                        const slot1Value = row[0];
+                        const slot2Value = row[1];
+                        const slot34Value = row[2];
+
+                        if (slot1Value && slot1Value !== '第1スロット') {
+                            if (slot2Value && slot2Value !== '第2スロット' && !tacticsData.slot2Map[slot1Value].includes(slot2Value)) {
+                                tacticsData.slot2Map[slot1Value].push(slot2Value);
+                            }
+                            if (slot34Value && slot34Value !== '第3・4スロット' && !tacticsData.slot34Map[slot1Value].includes(slot34Value)) {
+                                tacticsData.slot34Map[slot1Value].push(slot34Value);
+                            }
+                        }
+                    });
+
+                    setTactics(tacticsData);
+
+                    // 編成データ
                     try {
                         const formationsUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=編成`;
                         const formationsResponse = await fetch(formationsUrl);
@@ -650,35 +624,26 @@
                         
                         const formationsData = formationsParsed.data
                             .filter(row => row['編成名'] && row['編成名'].trim())
-                            .map((row, index) => {
-                                try {
-                                    return {
-                                        id: index,
-                                        name: row['編成名'],
-                                        date: row['作成日'],
-                                        pvpTeams: JSON.parse(row['対人戦部隊'] || '[]'),
-                                        siegeTeams: JSON.parse(row['攻城部隊'] || '[]'),
-                                        internalCommanders: JSON.parse(row['内政武将'] || '[]'),
-                                        memo: row['メモ'] || ''
-                                    };
-                                } catch (e) {
-                                    console.error('編成データのパースエラー:', e);
-                                    return null;
-                                }
-                            })
-                            .filter(f => f !== null);
+                            .map((row, index) => ({
+                                id: index,
+                                name: row['編成名'],
+                                date: row['作成日'],
+                                pvpTeams: JSON.parse(row['対人戦部隊'] || '[]'),
+                                siegeTeams: JSON.parse(row['攻城部隊'] || '[]'),
+                                internalCommanders: JSON.parse(row['内政武将'] || '[]'),
+                                memo: row['メモ'] || ''
+                            }));
                         
                         setFormations(formationsData);
                     } catch (e) {
-                        console.log('編成シートが存在しないか、読み込みエラー');
                         setFormations([]);
                     }
 
                     setSyncStatus('同期完了');
                     setTimeout(() => setSyncStatus(''), 2000);
                 } catch (error) {
-                    console.error('データ読み込みエラー:', error);
-                    setSyncStatus('エラー: ' + error.message);
+                    console.error('エラー:', error);
+                    setSyncStatus('エラー');
                 }
                 
                 setLoading(false);
@@ -688,16 +653,56 @@
                 loadData();
             }, [loadData]);
 
-            // 戦法使用状況を計算
+            // 武将重複チェック
+            const checkCommanderDuplicates = useCallback(() => {
+                const usedCommanders = {};
+                const errors = [];
+
+                const checkTeams = (teams, teamType) => {
+                    teams.forEach((team, teamIndex) => {
+                        team.commanders.forEach((commander, cmdIndex) => {
+                            if (commander.commanderName) {
+                                if (usedCommanders[commander.commanderName]) {
+                                    errors.push({
+                                        name: commander.commanderName,
+                                        locations: [usedCommanders[commander.commanderName], `${teamType}${teamIndex + 1}-武将${cmdIndex + 1}`]
+                                    });
+                                } else {
+                                    usedCommanders[commander.commanderName] = `${teamType}${teamIndex + 1}-武将${cmdIndex + 1}`;
+                                }
+                            }
+                        });
+                    });
+                };
+
+                checkTeams(pvpTeams, '対人');
+                checkTeams(siegeTeams, '攻城');
+                internalCommanders.forEach((commander, index) => {
+                    if (commander.commanderName) {
+                        if (usedCommanders[commander.commanderName]) {
+                            errors.push({
+                                name: commander.commanderName,
+                                locations: [usedCommanders[commander.commanderName], `内政${index + 1}`]
+                            });
+                        } else {
+                            usedCommanders[commander.commanderName] = `内政${index + 1}`;
+                        }
+                    }
+                });
+
+                return errors;
+            }, [pvpTeams, siegeTeams, internalCommanders]);
+
+            // 戦法使用状況
             const calculateStrategyUsage = useCallback(() => {
                 const usage = {};
                 
                 const countStrategies = (teams) => {
                     teams.forEach(team => {
                         team.commanders.forEach(commander => {
-                            commander.strategies.forEach(strategyId => {
-                                if (strategyId) {
-                                    usage[strategyId] = (usage[strategyId] || 0) + 1;
+                            commander.strategies.forEach(strategyName => {
+                                if (strategyName) {
+                                    usage[strategyName] = (usage[strategyName] || 0) + 1;
                                 }
                             });
                         });
@@ -707,9 +712,9 @@
                 countStrategies(pvpTeams);
                 countStrategies(siegeTeams);
                 internalCommanders.forEach(commander => {
-                    commander.strategies.forEach(strategyId => {
-                        if (strategyId) {
-                            usage[strategyId] = (usage[strategyId] || 0) + 1;
+                    commander.strategies.forEach(strategyName => {
+                        if (strategyName) {
+                            usage[strategyName] = (usage[strategyName] || 0) + 1;
                         }
                     });
                 });
@@ -717,15 +722,14 @@
                 return usage;
             }, [pvpTeams, siegeTeams, internalCommanders]);
 
-            // 戦法選択の検証
-            const validateStrategy = (strategyId) => {
-                if (!strategyId) return { valid: true };
+            const validateStrategy = (strategyName) => {
+                if (!strategyName) return { valid: true };
                 
-                const strategy = strategies.find(s => s.id === parseInt(strategyId));
+                const strategy = strategies.find(s => s.name === strategyName);
                 if (!strategy) return { valid: true };
 
                 const usage = calculateStrategyUsage();
-                const currentUsage = usage[strategyId] || 0;
+                const currentUsage = usage[strategyName] || 0;
 
                 if (currentUsage > strategy.maxLearns) {
                     return {
@@ -747,53 +751,20 @@
                 };
             };
 
-            // スプレッドシートに保存
-            const saveToSheet = async (formationData, isUpdate = false) => {
-                try {
-                    setSyncStatus('保存中...');
-                    
-                    // Google Apps Scriptのウェブアプリエンドポイントを使用
-                    // 注: 実際に使用する前にGoogle Apps Scriptを設定する必要があります
-                    const scriptUrl = 'https://script.google.com/macros/s/AKfycby7oGuBXMaOyreSIKKEYa8f3OL6r4pHdz1CvRNPnte3fUW6dqA7_1-eQwpz-D7Tw7Ys3A/exec'; // ここにGoogle Apps ScriptのURLを設定
-                    
-                    const response = await fetch(scriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: isUpdate ? 'update' : 'create',
-                            formationId: isUpdate ? editingFormationId : null,
-                            data: {
-                                name: formationData.name,
-                                date: formationData.date,
-                                pvpTeams: JSON.stringify(formationData.pvpTeams),
-                                siegeTeams: JSON.stringify(formationData.siegeTeams),
-                                internalCommanders: JSON.stringify(formationData.internalCommanders),
-                                memo: formationData.memo
-                            }
-                        })
-                    });
-                    
-                    setSyncStatus('保存完了');
-                    setTimeout(() => setSyncStatus(''), 2000);
-                    
-                    // データを再読み込み
-                    await loadData();
-                    
-                } catch (error) {
-                    console.error('保存エラー:', error);
-                    setSyncStatus('保存エラー');
-                }
-            };
-
-            // 編成保存（モーダル表示）
             const [showSaveModal, setShowSaveModal] = useState(false);
 
             const handleSaveClick = () => {
                 if (!formationName.trim()) {
                     alert('編成名を入力してください');
+                    return;
+                }
+
+                const duplicateErrors = checkCommanderDuplicates();
+                if (duplicateErrors.length > 0) {
+                    const errorMsg = duplicateErrors.map(err => 
+                        `${err.name}: ${err.locations.join(' と ')}`
+                    ).join('\n');
+                    alert('武将の重複エラー:\n' + errorMsg);
                     return;
                 }
                 
@@ -814,10 +785,13 @@
                     memo
                 };
 
-                await saveToSheet(formationData, false);
+                // ローカルストレージに保存
+                const saved = [...formations, formationData];
+                setFormations(saved);
+                localStorage.setItem('formations_v3', JSON.stringify(saved));
+                
                 setShowSaveModal(false);
                 setEditingFormationId(null);
-                resetForm();
                 alert('新規編成として保存しました！');
             };
 
@@ -831,149 +805,109 @@
                     memo
                 };
 
-                await saveToSheet(formationData, true);
+                const updated = formations.map((f, i) => 
+                    i === editingFormationId ? formationData : f
+                );
+                setFormations(updated);
+                localStorage.setItem('formations_v3', JSON.stringify(updated));
+                
                 setShowSaveModal(false);
                 setEditingFormationId(null);
-                resetForm();
                 alert('編成を上書き保存しました！');
             };
 
-            const resetForm = () => {
-                setFormationName('');
-                setMemo('');
-                setPvpTeams(Array(5).fill(null).map(() => ({
-                    soldierType: '槍',
-                    commanders: Array(3).fill(null).map(() => ({
-                        commanderId: '',
-                        strategies: ['', '']
-                    }))
-                })));
-                setSiegeTeams(Array(5).fill(null).map(() => ({
-                    soldierType: '兵器',
-                    commanders: Array(3).fill(null).map(() => ({
-                        commanderId: '',
-                        strategies: ['', '']
-                    }))
-                })));
-                setInternalCommanders(Array(10).fill(null).map(() => ({
-                    commanderId: '',
-                    strategies: ['', '']
-                })));
-            };
-
-            // 編成読み込み
-            const loadFormation = (formation) => {
-                setEditingFormationId(formation.id);
+            const loadFormation = (formation, index) => {
+                setEditingFormationId(index);
                 setFormationName(formation.name);
-                setPvpTeams(formation.pvpTeams || []);
-                setSiegeTeams(formation.siegeTeams || []);
-                setInternalCommanders(formation.internalCommanders || []);
+                setPvpTeams(formation.pvpTeams);
+                setSiegeTeams(formation.siegeTeams);
+                setInternalCommanders(formation.internalCommanders);
                 setMemo(formation.memo || '');
                 setActiveTab('pvp');
             };
 
-            // 編成削除
-            const deleteFormation = async (formationId) => {
+            const deleteFormation = (index) => {
                 if (!confirm('この編成を削除しますか？')) return;
                 
-                try {
-                    setSyncStatus('削除中...');
-                    
-                    const scriptUrl = 'https://script.google.com/macros/s/AKfycby7oGuBXMaOyreSIKKEYa8f3OL6r4pHdz1CvRNPnte3fUW6dqA7_1-eQwpz-D7Tw7Ys3A/exec';
-                    await fetch(scriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'delete',
-                            formationId: formationId
-                        })
-                    });
-                    
-                    setSyncStatus('削除完了');
-                    setTimeout(() => setSyncStatus(''), 2000);
-                    await loadData();
-                    
-                } catch (error) {
-                    console.error('削除エラー:', error);
-                    setSyncStatus('削除エラー');
-                }
+                const updated = formations.filter((_, i) => i !== index);
+                setFormations(updated);
+                localStorage.setItem('formations_v3', JSON.stringify(updated));
             };
+
+            // 初回ロード時にlocalStorageから読み込み
+            useEffect(() => {
+                const saved = localStorage.getItem('formations_v3');
+                if (saved) {
+                    try {
+                        setFormations(JSON.parse(saved));
+                    } catch (e) {
+                        console.error('編成データ読み込みエラー');
+                    }
+                }
+            }, []);
 
             if (loading) {
                 return (
                     <div className="app-container">
                         <div className="header">
                             <h1>⚔️ 三国志新戦</h1>
-                            <p>部隊編成ツール v2</p>
+                            <p>部隊編成ツール v3.0</p>
                         </div>
-                        <div className="loading">
-                            <div>データを読み込み中...</div>
-                        </div>
+                        <div className="loading">データを読み込み中...</div>
                     </div>
                 );
             }
+
+            const duplicateErrors = checkCommanderDuplicates();
 
             return (
                 <div className="app-container">
                     <div className="header">
                         <h1>⚔️ 三国志新戦</h1>
-                        <p>部隊編成ツール v2</p>
+                        <p>部隊編成ツール v3.0</p>
                         <div className="sync-status">
-                            <span className={`status-indicator ${syncStatus === '読み込み中...' || syncStatus === '保存中...' ? 'status-loading' : syncStatus.includes('完了') ? 'status-success' : syncStatus.includes('エラー') ? 'status-error' : ''}`}></span>
                             {syncStatus || 'スタンバイ'}
-                            <button className="sync-btn" onClick={loadData}>
-                                🔄 再読込
-                            </button>
+                            <button className="sync-btn" onClick={loadData}>🔄 再読込</button>
                         </div>
                     </div>
 
                     <div className="tabs">
-                        <button 
-                            className={`tab ${activeTab === 'pvp' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('pvp')}
-                        >
-                            対人戦
-                        </button>
-                        <button 
-                            className={`tab ${activeTab === 'siege' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('siege')}
-                        >
-                            攻城
-                        </button>
-                        <button 
-                            className={`tab ${activeTab === 'internal' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('internal')}
-                        >
-                            内政
-                        </button>
-                        <button 
-                            className={`tab ${activeTab === 'saved' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('saved')}
-                        >
-                            保存済み
-                        </button>
+                        <button className={`tab ${activeTab === 'pvp' ? 'active' : ''}`} onClick={() => setActiveTab('pvp')}>対人戦</button>
+                        <button className={`tab ${activeTab === 'siege' ? 'active' : ''}`} onClick={() => setActiveTab('siege')}>攻城</button>
+                        <button className={`tab ${activeTab === 'internal' ? 'active' : ''}`} onClick={() => setActiveTab('internal')}>内政</button>
+                        <button className={`tab ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>保存済み</button>
                     </div>
 
                     <div className="content">
+                        {duplicateErrors.length > 0 && activeTab !== 'saved' && (
+                            <div className="duplicate-error">
+                                ⚠️ 武将の重複エラー:
+                                {duplicateErrors.map((err, i) => (
+                                    <div key={i}>• {err.name}: {err.locations.join(' と ')}</div>
+                                ))}
+                            </div>
+                        )}
+
                         {activeTab === 'pvp' && (
-                            <PvPTeams 
+                            <Teams 
                                 teams={pvpTeams}
                                 setTeams={setPvpTeams}
+                                title="対人戦部隊"
                                 commanders={commanders}
                                 strategies={strategies}
+                                tactics={tactics}
                                 validateStrategy={validateStrategy}
                             />
                         )}
 
                         {activeTab === 'siege' && (
-                            <SiegeTeams 
+                            <Teams 
                                 teams={siegeTeams}
                                 setTeams={setSiegeTeams}
+                                title="攻城部隊"
                                 commanders={commanders}
                                 strategies={strategies}
+                                tactics={tactics}
                                 validateStrategy={validateStrategy}
                             />
                         )}
@@ -984,6 +918,7 @@
                                 setInternalCommanders={setInternalCommanders}
                                 commanders={commanders}
                                 strategies={strategies}
+                                tactics={tactics}
                                 validateStrategy={validateStrategy}
                             />
                         )}
@@ -1001,9 +936,7 @@
                         {activeTab !== 'saved' && (
                             <div className="section">
                                 <div className="input-group">
-                                    <label className="input-label">
-                                        編成名 {editingFormationId !== null && '(編集中)'}
-                                    </label>
+                                    <label className="input-label">編成名 {editingFormationId !== null && '(編集中)'}</label>
                                     <input 
                                         type="text"
                                         value={formationName}
@@ -1019,16 +952,9 @@
                                         placeholder="編成のコンセプトや注意点など"
                                     />
                                 </div>
-                                <button className="btn" onClick={handleSaveClick}>
-                                    💾 編成を保存
-                                </button>
+                                <button className="btn" onClick={handleSaveClick}>💾 編成を保存</button>
                                 {editingFormationId !== null && (
-                                    <button className="btn btn-secondary" onClick={() => {
-                                        setEditingFormationId(null);
-                                        resetForm();
-                                    }}>
-                                        ✕ 編集をキャンセル
-                                    </button>
+                                    <button className="btn btn-secondary" onClick={() => setEditingFormationId(null)}>✕ 編集をキャンセル</button>
                                 )}
                             </div>
                         )}
@@ -1038,20 +964,12 @@
                         <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                                 <div className="modal-title">保存方法を選択</div>
-                                <div className="modal-text">
-                                    既存の編成を編集中です。上書き保存しますか？それとも新規編成として保存しますか？
-                                </div>
+                                <div className="modal-text">既存の編成を編集中です。上書き保存しますか？</div>
                                 <div className="modal-buttons">
-                                    <button className="btn btn-success" onClick={saveOverwrite}>
-                                        上書き保存
-                                    </button>
-                                    <button className="btn" onClick={saveAsNew}>
-                                        新規保存
-                                    </button>
+                                    <button className="btn btn-success" onClick={saveOverwrite}>上書き保存</button>
+                                    <button className="btn" onClick={saveAsNew}>新規保存</button>
                                 </div>
-                                <button className="btn btn-secondary" style={{marginTop: '10px'}} onClick={() => setShowSaveModal(false)}>
-                                    キャンセル
-                                    </button>
+                                <button className="btn btn-secondary" style={{marginTop: '10px'}} onClick={() => setShowSaveModal(false)}>キャンセル</button>
                             </div>
                         </div>
                     )}
@@ -1059,7 +977,6 @@
             );
         }
 
-        // 検索可能なセレクトコンポーネント
         function SearchableSelect({ value, onChange, options, placeholder, renderOption, renderValue }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [isOpen, setIsOpen] = useState(false);
@@ -1071,7 +988,6 @@
                         setIsOpen(false);
                     }
                 };
-
                 document.addEventListener('mousedown', handleClickOutside);
                 return () => document.removeEventListener('mousedown', handleClickOutside);
             }, []);
@@ -1080,22 +996,14 @@
                 renderOption(option).toLowerCase().includes(searchTerm.toLowerCase())
             );
 
-            const selectedOption = options.find(opt => opt.id === parseInt(value));
+            const selectedOption = options.find(opt => opt.name === value);
 
             return (
                 <div className="search-select-container" ref={containerRef}>
                     {selectedOption ? (
                         <div className="selected-value">
                             {renderValue ? renderValue(selectedOption) : renderOption(selectedOption)}
-                            <button 
-                                className="clear-btn" 
-                                onClick={() => {
-                                    onChange('');
-                                    setSearchTerm('');
-                                }}
-                            >
-                                ✕
-                            </button>
+                            <button className="clear-btn" onClick={() => { onChange(''); setSearchTerm(''); }}>✕</button>
                         </div>
                     ) : (
                         <>
@@ -1103,10 +1011,7 @@
                                 type="text"
                                 className="search-input"
                                 value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    setIsOpen(true);
-                                }}
+                                onChange={(e) => { setSearchTerm(e.target.value); setIsOpen(true); }}
                                 onFocus={() => setIsOpen(true)}
                                 placeholder={placeholder}
                             />
@@ -1114,13 +1019,9 @@
                                 <div className="search-dropdown">
                                     {filteredOptions.map(option => (
                                         <div
-                                            key={option.id}
+                                            key={option.name}
                                             className="search-option"
-                                            onClick={() => {
-                                                onChange(option.id.toString());
-                                                setSearchTerm('');
-                                                setIsOpen(false);
-                                            }}
+                                            onClick={() => { onChange(option.name); setSearchTerm(''); setIsOpen(false); }}
                                         >
                                             {renderOption(option)}
                                         </div>
@@ -1133,7 +1034,58 @@
             );
         }
 
-        function PvPTeams({ teams, setTeams, commanders, strategies, validateStrategy }) {
+        function TacticsSelector({ tactics, commanderTactics, updateTactics }) {
+            const slot2Options = commanderTactics.slot1 ? tactics.slot2Map[commanderTactics.slot1] || [] : [];
+            const slot34Options = commanderTactics.slot1 ? tactics.slot34Map[commanderTactics.slot1] || [] : [];
+
+            return (
+                <div className="tactics-section">
+                    <div className="tactics-title">兵法設定</div>
+                    
+                    <div className="tactics-slot">
+                        <label className="input-label">第1スロット</label>
+                        <select
+                            value={commanderTactics.slot1}
+                            onChange={(e) => updateTactics({ slot1: e.target.value, slot2: '', slot3: '', slot4: '' })}
+                        >
+                            <option value="">選択してください</option>
+                            {tactics.slot1.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                    </div>
+
+                    {commanderTactics.slot1 && (
+                        <div className="tactics-slot">
+                            <label className="input-label">第2スロット</label>
+                            <select value={commanderTactics.slot2} onChange={(e) => updateTactics({ ...commanderTactics, slot2: e.target.value })}>
+                                <option value="">選択してください</option>
+                                {slot2Options.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                    )}
+
+                    {commanderTactics.slot1 && (
+                        <>
+                            <div className="tactics-slot">
+                                <label className="input-label">第3スロット</label>
+                                <select value={commanderTactics.slot3} onChange={(e) => updateTactics({ ...commanderTactics, slot3: e.target.value })}>
+                                    <option value="">選択してください</option>
+                                    {slot34Options.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                            <div className="tactics-slot">
+                                <label className="input-label">第4スロット</label>
+                                <select value={commanderTactics.slot4} onChange={(e) => updateTactics({ ...commanderTactics, slot4: e.target.value })}>
+                                    <option value="">選択してください</option>
+                                    {slot34Options.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        function Teams({ teams, setTeams, title, commanders, strategies, tactics, validateStrategy }) {
             const updateTeam = (teamIndex, field, value) => {
                 const updated = [...teams];
                 updated[teamIndex] = { ...updated[teamIndex], [field]: value };
@@ -1155,9 +1107,15 @@
                 setTeams(updated);
             };
 
+            const updateTacticsSlot = (teamIndex, commanderIndex, tacticsData) => {
+                const updated = [...teams];
+                updated[teamIndex].commanders[commanderIndex].tactics = tacticsData;
+                setTeams(updated);
+            };
+
             return (
                 <div className="section">
-                    <div className="section-title">対人戦部隊 (5部隊)</div>
+                    <div className="section-title">{title} (5部隊)</div>
                     <div className="team-grid">
                         {teams.map((team, teamIndex) => (
                             <div key={teamIndex} className="team-card">
@@ -1166,7 +1124,7 @@
                                 <div className="input-group">
                                     <label className="input-label">兵種</label>
                                     <div className="soldier-types">
-                                        {['槍', '弓', '馬', '盾'].map(type => (
+                                        {['槍', '弓', '馬', '盾', '兵器'].map(type => (
                                             <button
                                                 key={type}
                                                 className={`soldier-type-btn ${team.soldierType === type ? 'active' : ''}`}
@@ -1178,30 +1136,32 @@
                                     </div>
                                 </div>
 
+                                <div className="input-group">
+                                    <label className="input-label">部隊メモ</label>
+                                    <textarea 
+                                        value={team.memo}
+                                        onChange={(e) => updateTeam(teamIndex, 'memo', e.target.value)}
+                                        placeholder="この部隊の使い方など"
+                                    />
+                                </div>
+
                                 {team.commanders.map((commander, commanderIndex) => (
                                     <div key={commanderIndex} className="commander-slot">
                                         <div className="input-group">
-                                            <label className="input-label">
-                                                武将 {commanderIndex + 1}
-                                                {commanderIndex === 0 && ' (主将)'}
-                                            </label>
+                                            <label className="input-label">武将 {commanderIndex + 1} {commanderIndex === 0 && '(主将)'}</label>
                                             <SearchableSelect
-                                                value={commander.commanderId}
-                                                onChange={(value) => updateCommander(teamIndex, commanderIndex, 'commanderId', value)}
+                                                value={commander.commanderName}
+                                                onChange={(value) => updateCommander(teamIndex, commanderIndex, 'commanderName', value)}
                                                 options={commanders}
                                                 placeholder="武将を検索..."
                                                 renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
                                                 renderValue={(cmd) => {
-                                                    const aptKey = team.soldierType === '槍' ? 'spear' : 
-                                                                  team.soldierType === '弓' ? 'bow' :
-                                                                  team.soldierType === '馬' ? 'cavalry' : 'shield';
+                                                    const aptKey = team.soldierType === '槍' ? 'spear' : team.soldierType === '弓' ? 'bow' : team.soldierType === '馬' ? 'cavalry' : team.soldierType === '盾' ? 'shield' : 'siege';
                                                     const apt = cmd[aptKey];
                                                     return (
                                                         <>
                                                             {cmd.name} [{cmd.faction}] ★{cmd.stars}
-                                                            <span className={`aptitude-badge aptitude-${apt}`}>
-                                                                {team.soldierType}: {apt}
-                                                            </span>
+                                                            <span className={`aptitude-badge aptitude-${apt}`}>{team.soldierType}: {apt}</span>
                                                         </>
                                                     );
                                                 }}
@@ -1209,31 +1169,31 @@
                                         </div>
 
                                         <div className="strategy-slots">
-                                            {commander.strategies.map((strategyId, strategyIndex) => (
+                                            {commander.strategies.map((strategyName, strategyIndex) => (
                                                 <div key={strategyIndex} className="strategy-slot">
                                                     <label className="input-label">戦法 {strategyIndex + 1}</label>
                                                     <SearchableSelect
-                                                        value={strategyId}
+                                                        value={strategyName}
                                                         onChange={(value) => updateStrategy(teamIndex, commanderIndex, strategyIndex, value)}
                                                         options={strategies}
                                                         placeholder="戦法を検索..."
                                                         renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
                                                     />
-                                                    {strategyId && (() => {
-                                                        const validation = validateStrategy(strategyId);
-                                                        if (!validation.valid) {
-                                                            return <div className="strategy-error">{validation.error}</div>;
-                                                        }
-                                                        if (validation.warning) {
-                                                            return <div className="strategy-warning">{validation.warning}</div>;
-                                                        }
-                                                        if (validation.info) {
-                                                            return <div className="strategy-info">{validation.info}</div>;
-                                                        }
+                                                    {strategyName && (() => {
+                                                        const validation = validateStrategy(strategyName);
+                                                        if (!validation.valid) return <div className="strategy-error">{validation.error}</div>;
+                                                        if (validation.warning) return <div className="strategy-warning">{validation.warning}</div>;
+                                                        if (validation.info) return <div className="strategy-info">{validation.info}</div>;
                                                     })()}
                                                 </div>
                                             ))}
                                         </div>
+
+                                        <TacticsSelector 
+                                            tactics={tactics}
+                                            commanderTactics={commander.tactics}
+                                            updateTactics={(tacticsData) => updateTacticsSlot(teamIndex, commanderIndex, tacticsData)}
+                                        />
                                     </div>
                                 ))}
                             </div>
@@ -1243,90 +1203,7 @@
             );
         }
 
-        function SiegeTeams({ teams, setTeams, commanders, strategies, validateStrategy }) {
-            const updateCommander = (teamIndex, commanderIndex, field, value) => {
-                const updated = [...teams];
-                updated[teamIndex].commanders[commanderIndex] = {
-                    ...updated[teamIndex].commanders[commanderIndex],
-                    [field]: value
-                };
-                setTeams(updated);
-            };
-
-            const updateStrategy = (teamIndex, commanderIndex, strategyIndex, value) => {
-                const updated = [...teams];
-                updated[teamIndex].commanders[commanderIndex].strategies[strategyIndex] = value;
-                setTeams(updated);
-            };
-
-            return (
-                <div className="section">
-                    <div className="section-title">攻城部隊 (5部隊)</div>
-                    <div className="team-grid">
-                        {teams.map((team, teamIndex) => (
-                            <div key={teamIndex} className="team-card">
-                                <h3>攻城部隊 {teamIndex + 1} [兵器]</h3>
-
-                                {team.commanders.map((commander, commanderIndex) => (
-                                    <div key={commanderIndex} className="commander-slot">
-                                        <div className="input-group">
-                                            <label className="input-label">
-                                                武将 {commanderIndex + 1}
-                                                {commanderIndex === 0 && ' (主将)'}
-                                            </label>
-                                            <SearchableSelect
-                                                value={commander.commanderId}
-                                                onChange={(value) => updateCommander(teamIndex, commanderIndex, 'commanderId', value)}
-                                                options={commanders}
-                                                placeholder="武将を検索..."
-                                                renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
-                                                renderValue={(cmd) => (
-                                                    <>
-                                                        {cmd.name} [{cmd.faction}] ★{cmd.stars}
-                                                        <span className={`aptitude-badge aptitude-${cmd.siege}`}>
-                                                            兵器: {cmd.siege}
-                                                        </span>
-                                                    </>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div className="strategy-slots">
-                                            {commander.strategies.map((strategyId, strategyIndex) => (
-                                                <div key={strategyIndex} className="strategy-slot">
-                                                    <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                                    <SearchableSelect
-                                                        value={strategyId}
-                                                        onChange={(value) => updateStrategy(teamIndex, commanderIndex, strategyIndex, value)}
-                                                        options={strategies}
-                                                        placeholder="戦法を検索..."
-                                                        renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
-                                                    />
-                                                    {strategyId && (() => {
-                                                        const validation = validateStrategy(strategyId);
-                                                        if (!validation.valid) {
-                                                            return <div className="strategy-error">{validation.error}</div>;
-                                                        }
-                                                        if (validation.warning) {
-                                                            return <div className="strategy-warning">{validation.warning}</div>;
-                                                        }
-                                                        if (validation.info) {
-                                                            return <div className="strategy-info">{validation.info}</div>;
-                                                        }
-                                                    })()}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
-        function InternalCommanders({ internalCommanders, setInternalCommanders, commanders, strategies, validateStrategy }) {
+        function InternalCommanders({ internalCommanders, setInternalCommanders, commanders, strategies, tactics, validateStrategy }) {
             const updateCommander = (index, field, value) => {
                 const updated = [...internalCommanders];
                 updated[index] = { ...updated[index], [field]: value };
@@ -1339,54 +1216,58 @@
                 setInternalCommanders(updated);
             };
 
+            const updateTacticsSlot = (index, tacticsData) => {
+                const updated = [...internalCommanders];
+                updated[index].tactics = tacticsData;
+                setInternalCommanders(updated);
+            };
+
             return (
                 <div className="section">
                     <div className="section-title">内政武将 (10人)</div>
-                    <div className="internal-commanders">
-                        {internalCommanders.map((commander, index) => (
-                            <div key={index} className="internal-card">
-                                <div className="internal-card-title">内政武将 {index + 1}</div>
-                                
-                                <div className="input-group">
-                                    <label className="input-label">武将</label>
-                                    <SearchableSelect
-                                        value={commander.commanderId}
-                                        onChange={(value) => updateCommander(index, 'commanderId', value)}
-                                        options={commanders}
-                                        placeholder="武将を検索..."
-                                        renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
-                                    />
-                                </div>
-
-                                <div className="strategy-slots">
-                                    {commander.strategies.map((strategyId, strategyIndex) => (
-                                        <div key={strategyIndex} className="strategy-slot">
-                                            <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                            <SearchableSelect
-                                                value={strategyId}
-                                                onChange={(value) => updateStrategy(index, strategyIndex, value)}
-                                                options={strategies}
-                                                placeholder="戦法を検索..."
-                                                renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
-                                            />
-                                            {strategyId && (() => {
-                                                const validation = validateStrategy(strategyId);
-                                                if (!validation.valid) {
-                                                    return <div className="strategy-error">{validation.error}</div>;
-                                                }
-                                                if (validation.warning) {
-                                                    return <div className="strategy-warning">{validation.warning}</div>;
-                                                }
-                                                if (validation.info) {
-                                                    return <div className="strategy-info">{validation.info}</div>;
-                                                }
-                                            })()}
-                                        </div>
-                                    ))}
-                                </div>
+                    {internalCommanders.map((commander, index) => (
+                        <div key={index} className="internal-card">
+                            <h4>内政武将 {index + 1}</h4>
+                            
+                            <div className="input-group">
+                                <label className="input-label">武将</label>
+                                <SearchableSelect
+                                    value={commander.commanderName}
+                                    onChange={(value) => updateCommander(index, 'commanderName', value)}
+                                    options={commanders}
+                                    placeholder="武将を検索..."
+                                    renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
+                                />
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="strategy-slots">
+                                {commander.strategies.map((strategyName, strategyIndex) => (
+                                    <div key={strategyIndex} className="strategy-slot">
+                                        <label className="input-label">戦法 {strategyIndex + 1}</label>
+                                        <SearchableSelect
+                                            value={strategyName}
+                                            onChange={(value) => updateStrategy(index, strategyIndex, value)}
+                                            options={strategies}
+                                            placeholder="戦法を検索..."
+                                            renderOption={(strat) => `${strat.name} [${strat.type}]`}
+                                        />
+                                        {strategyName && (() => {
+                                            const validation = validateStrategy(strategyName);
+                                            if (!validation.valid) return <div className="strategy-error">{validation.error}</div>;
+                                            if (validation.warning) return <div className="strategy-warning">{validation.warning}</div>;
+                                            if (validation.info) return <div className="strategy-info">{validation.info}</div>;
+                                        })()}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <TacticsSelector 
+                                tactics={tactics}
+                                commanderTactics={commander.tactics}
+                                updateTactics={(tacticsData) => updateTacticsSlot(index, tacticsData)}
+                            />
+                        </div>
+                    ))}
                 </div>
             );
         }
@@ -1394,25 +1275,12 @@
         function SavedFormations({ formations, commanders, strategies, loadFormation, deleteFormation }) {
             if (formations.length === 0) {
                 return (
-                    <div className="empty-state">
-                        <div className="empty-state-icon">📋</div>
+                    <div style={{textAlign: 'center', padding: '40px', color: '#6c757d'}}>
+                        <div style={{fontSize: '48px'}}>📋</div>
                         <div>保存された編成はまだありません</div>
-                        <p style={{fontSize: '14px', marginTop: '8px', color: '#6c757d'}}>
-                            対人戦・攻城・内政タブで編成を作成して保存してください
-                        </p>
                     </div>
                 );
             }
-
-            const getCommanderName = (commanderId) => {
-                const commander = commanders.find(c => c.id === parseInt(commanderId));
-                return commander ? commander.name : '未設定';
-            };
-
-            const getStrategyName = (strategyId) => {
-                const strategy = strategies.find(s => s.id === parseInt(strategyId));
-                return strategy ? strategy.name : '未設定';
-            };
 
             return (
                 <div className="section">
@@ -1422,132 +1290,17 @@
                             <div className="formation-header">
                                 <div>
                                     <div className="formation-title">{formation.name}</div>
-                                    <div className="formation-date">作成日: {formation.date}</div>
+                                    <div style={{fontSize: '12px', color: '#6c757d'}}>{formation.date}</div>
                                 </div>
                             </div>
-
                             {formation.memo && (
-                                <div style={{
-                                    background: '#f8f9fa',
-                                    padding: '10px',
-                                    borderRadius: '6px',
-                                    fontSize: '13px',
-                                    color: '#495057',
-                                    marginTop: '12px',
-                                    marginBottom: '12px'
-                                }}>
+                                <div style={{background: '#f8f9fa', padding: '10px', borderRadius: '6px', fontSize: '13px', marginTop: '12px'}}>
                                     {formation.memo}
                                 </div>
                             )}
-
-                            <div className="formation-section">
-                                <div className="formation-section-title">対人戦部隊</div>
-                                {formation.pvpTeams && formation.pvpTeams.map((team, teamIndex) => {
-                                    const hasCommanders = team.commanders.some(c => c.commanderId);
-                                    if (!hasCommanders) return null;
-                                    
-                                    return (
-                                        <div key={teamIndex} className="mini-team">
-                                            <div className="mini-team-title">
-                                                部隊{teamIndex + 1} [{team.soldierType}]
-                                            </div>
-                                            {team.commanders.map((commander, cmdIndex) => {
-                                                if (!commander.commanderId) return null;
-                                                return (
-                                                    <div key={cmdIndex}>
-                                                        <div className="mini-commander">
-                                                            • {getCommanderName(commander.commanderId)}
-                                                        </div>
-                                                        {commander.strategies.map((strategyId, sIndex) => {
-                                                            if (!strategyId) return null;
-                                                            return (
-                                                                <div key={sIndex} className="mini-strategy">
-                                                                    └ {getStrategyName(strategyId)}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="formation-section">
-                                <div className="formation-section-title">攻城部隊</div>
-                                {formation.siegeTeams && formation.siegeTeams.map((team, teamIndex) => {
-                                    const hasCommanders = team.commanders.some(c => c.commanderId);
-                                    if (!hasCommanders) return null;
-                                    
-                                    return (
-                                        <div key={teamIndex} className="mini-team">
-                                            <div className="mini-team-title">
-                                                攻城{teamIndex + 1} [兵器]
-                                            </div>
-                                            {team.commanders.map((commander, cmdIndex) => {
-                                                if (!commander.commanderId) return null;
-                                                return (
-                                                    <div key={cmdIndex}>
-                                                        <div className="mini-commander">
-                                                            • {getCommanderName(commander.commanderId)}
-                                                        </div>
-                                                        {commander.strategies.map((strategyId, sIndex) => {
-                                                            if (!strategyId) return null;
-                                                            return (
-                                                                <div key={sIndex} className="mini-strategy">
-                                                                    └ {getStrategyName(strategyId)}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="formation-section">
-                                <div className="formation-section-title">内政武将</div>
-                                {formation.internalCommanders && formation.internalCommanders.map((commander, cmdIndex) => {
-                                    if (!commander.commanderId) return null;
-                                    return (
-                                        <div key={cmdIndex} className="mini-team">
-                                            <div className="mini-commander">
-                                                • {getCommanderName(commander.commanderId)}
-                                            </div>
-                                            {commander.strategies.map((strategyId, sIndex) => {
-                                                if (!strategyId) return null;
-                                                return (
-                                                    <div key={sIndex} className="mini-strategy">
-                                                        └ {getStrategyName(strategyId)}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })}
-                                {(!formation.internalCommanders || formation.internalCommanders.filter(c => c.commanderId).length === 0) && (
-                                    <div className="mini-team">
-                                        <div className="mini-commander" style={{color: '#adb5bd'}}>未設定</div>
-                                    </div>
-                                )}
-                            </div>
-
                             <div className="action-buttons">
-                                <button 
-                                    className="btn"
-                                    onClick={() => loadFormation(formation)}
-                                >
-                                    📝 編集
-                                </button>
-                                <button 
-                                    className="btn btn-danger"
-                                    onClick={() => deleteFormation(formation.id)}
-                                >
-                                    🗑️ 削除
-                                </button>
+                                <button className="btn" onClick={() => loadFormation(formation, index)}>📝 編集</button>
+                                <button className="btn btn-danger" onClick={() => deleteFormation(index)}>🗑️ 削除</button>
                             </div>
                         </div>
                     ))}
@@ -1555,7 +1308,6 @@
             );
         }
 
-        // アプリをレンダリング
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
