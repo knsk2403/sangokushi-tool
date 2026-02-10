@@ -200,7 +200,6 @@
                 try {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'list' })
                     });
                     const result = await response.json();
@@ -304,7 +303,6 @@
                     try {
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ action: 'create', data: formationData })
                         });
                         setSyncStatus('保存完了');
@@ -327,7 +325,6 @@
                     try {
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ action: 'update', formationName: editingFormationName, data: formationData })
                         });
                         setSyncStatus('保存完了');
