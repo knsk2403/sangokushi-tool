@@ -117,7 +117,7 @@
             const [memo, setMemo] = useState('');
 
             useEffect(() => {
-                if (SCRIPT_URL && SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbz0DpPZEkV8tgjb4AjN8aUAHsOJLjNo0SQj2gqlNFVMgxGhM40gmhMdqHNSMNpmydlXvw/exec') setUseSpreadsheet(true);
+                if (SCRIPT_URL) setUseSpreadsheet(true);
             }, []);
 
             useEffect(() => {
