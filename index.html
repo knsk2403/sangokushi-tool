@@ -89,8 +89,6 @@
         .team-count-selector { background: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 2px solid #8e44ad; }
     </style>
 </head>
-
-
 <body>
     <div id="root"></div>
     <script type="text/babel">
@@ -379,7 +377,6 @@
                     try {
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ action: 'delete', formationName: formation.name })
                         });
                         setSyncStatus('削除完了');
