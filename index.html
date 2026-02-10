@@ -4,587 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>三国志新戦 部隊編成ツール v3.1</title>
+    <title>三国志新戦 部隊編成ツール v3.2</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            max-width: 100vw;
-            min-height: 100vh;
-            background: #fff;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #c0392b 0%, #8e44ad 100%);
-            color: white;
-            padding: 20px 16px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .header h1 {
-            font-size: 22px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 13px;
-            opacity: 0.95;
-        }
-
-        .sync-status {
-            margin-top: 12px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 6px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sync-btn {
-            background: rgba(255,255,255,0.3);
-            border: none;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-left: auto;
-        }
-
-        .tabs {
-            display: flex;
-            background: #f8f9fa;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-bottom: 1px solid #dee2e6;
-            position: sticky;
-            top: 107px;
-            z-index: 99;
-        }
-
-        .tab {
-            flex: 1;
-            min-width: 80px;
-            padding: 14px 8px;
-            text-align: center;
-            background: #f8f9fa;
-            border: none;
-            font-size: 14px;
-            font-weight: 600;
-            color: #6c757d;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            background: white;
-            color: #8e44ad;
-            border-bottom: 3px solid #8e44ad;
-        }
-
-        .content {
-            padding: 16px;
-            padding-bottom: 80px;
-        }
-
-        .section {
-            margin-bottom: 24px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            padding-left: 12px;
-            border-left: 4px solid #8e44ad;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 6px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #8e44ad;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 60px;
-            font-family: inherit;
-        }
-
-        .search-select-container {
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-        }
-
-        .search-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            background: white;
-            border: 2px solid #8e44ad;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .search-option {
-            padding: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-
-        .search-option:hover {
-            background: #f8f9fa;
-        }
-
-        .selected-value {
-            padding: 8px 12px;
-            background: #e9ecef;
-            border-radius: 6px;
-            font-size: 14px;
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .clear-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: auto;
-        }
-
-        .soldier-types {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .soldier-type-btn {
-            flex: 1;
-            min-width: 60px;
-            padding: 12px 8px;
-            border: 2px solid #dee2e6;
-            background: white;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .soldier-type-btn.active {
-            background: #8e44ad;
-            color: white;
-            border-color: #8e44ad;
-        }
-
-        .team-grid {
-            display: grid;
-            gap: 16px;
-        }
-
-        .team-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 16px;
-            border: 2px solid #dee2e6;
-        }
-
-        .team-card h3 {
-            font-size: 16px;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .team-memo {
-            background: #e8f5e9;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            color: #2e7d32;
-            margin-bottom: 12px;
-        }
-
-        .commander-slot {
-            margin-bottom: 12px;
-        }
-
-        .aptitude-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-left: 8px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); min-height: 100vh; overflow-x: hidden; }
+        .app-container { max-width: 100vw; min-height: 100vh; background: #fff; }
+        .header { background: linear-gradient(135deg, #c0392b 0%, #8e44ad 100%); color: white; padding: 20px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .header h1 { font-size: 22px; margin-bottom: 8px; font-weight: 700; }
+        .header p { font-size: 13px; opacity: 0.95; }
+        .sync-status { margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+        .sync-btn { background: rgba(255,255,255,0.3); border: none; color: white; padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: auto; }
+        .tabs { display: flex; background: #f8f9fa; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid #dee2e6; position: sticky; top: 107px; z-index: 99; }
+        .tab { flex: 1; min-width: 80px; padding: 14px 8px; text-align: center; background: #f8f9fa; border: none; font-size: 14px; font-weight: 600; color: #6c757d; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .tab.active { background: white; color: #8e44ad; border-bottom: 3px solid #8e44ad; }
+        .content { padding: 16px; padding-bottom: 80px; }
+        .section { margin-bottom: 24px; }
+        .section-title { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid #8e44ad; }
+        .input-group { margin-bottom: 16px; }
+        .input-label { display: block; font-size: 14px; font-weight: 600; color: #495057; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px; background: white; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #8e44ad; }
+        textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+        .search-select-container { position: relative; }
+        .search-input { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px; background: white; }
+        .search-dropdown { position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: white; border: 2px solid #8e44ad; border-top: none; border-radius: 0 0 8px 8px; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .search-option { padding: 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .search-option:hover { background: #f8f9fa; }
+        .selected-value { padding: 8px 12px; background: #e9ecef; border-radius: 6px; font-size: 14px; margin-top: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .clear-btn { background: #dc3545; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: auto; }
+        .soldier-types { display: flex; gap: 8px; flex-wrap: wrap; }
+        .soldier-type-btn { flex: 1; min-width: 60px; padding: 12px 8px; border: 2px solid #dee2e6; background: white; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .soldier-type-btn.active { background: #8e44ad; color: white; border-color: #8e44ad; }
+        .team-grid { display: grid; gap: 16px; }
+        .team-card { background: #f8f9fa; border-radius: 12px; padding: 16px; border: 2px solid #dee2e6; }
+        .team-card h3 { font-size: 16px; color: #2c3e50; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #dee2e6; }
+        .commander-slot { margin-bottom: 12px; }
+        .aptitude-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-left: 8px; }
         .aptitude-S { background: #f39c12; color: white; }
         .aptitude-A { background: #3498db; color: white; }
         .aptitude-B { background: #2ecc71; color: white; }
         .aptitude-C { background: #95a5a6; color: white; }
-
-        .strategy-slots {
-            margin-top: 8px;
-            padding: 12px;
-            background: white;
-            border-radius: 6px;
-        }
-
-        .strategy-slot {
-            margin-bottom: 8px;
-        }
-
-        .tactics-section {
-            margin-top: 12px;
-            padding: 12px;
-            background: #fff8e1;
-            border-radius: 6px;
-            border: 2px solid #ffc107;
-        }
-
-        .tactics-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #856404;
-            margin-bottom: 8px;
-        }
-
-        .tactics-slot {
-            margin-bottom: 8px;
-        }
-
-        .strategy-warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .strategy-error {
-            background: #f8d7da;
-            border: 1px solid #dc3545;
-            color: #721c24;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .strategy-info {
-            background: #d1ecf1;
-            border: 1px solid #17a2b8;
-            color: #0c5460;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .duplicate-warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            color: #856404;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        .duplicate-error {
-            background: #f8d7da;
-            border: 2px solid #dc3545;
-            color: #721c24;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: #8e44ad;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 8px;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-            background: #7d3c98;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .btn-success {
-            background: #28a745;
-        }
-
-        .saved-formation-card {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 2px solid #dee2e6;
-        }
-
-        .formation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .formation-title-section {
-            flex: 1;
-        }
-
-        .formation-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 4px;
-        }
-
-        .formation-date {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
-        .accordion-icon {
-            font-size: 24px;
-            color: #6c757d;
-            transition: transform 0.3s;
-            user-select: none;
-        }
-
-        .accordion-icon.open {
-            transform: rotate(180deg);
-        }
-
-        .formation-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .formation-content.open {
-            max-height: 10000px;
-            transition: max-height 0.5s ease-in;
-        }
-
-        .formation-section {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .formation-section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #6c757d;
-            margin-bottom: 8px;
-        }
-
-        .mini-team {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-
-        .mini-team-header {
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 6px;
-        }
-
-        .mini-team-memo {
-            font-size: 11px;
-            color: #2e7d32;
-            background: #e8f5e9;
-            padding: 4px 8px;
-            border-radius: 3px;
-            margin-bottom: 6px;
-        }
-
-        .mini-commander {
-            font-size: 12px;
-            color: #495057;
-            margin-left: 8px;
-            margin-bottom: 2px;
-        }
-
-        .mini-strategy, .mini-tactics {
-            font-size: 11px;
-            color: #6c757d;
-            margin-left: 16px;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 16px;
-        }
-
-        .modal-text {
-            font-size: 14px;
-            color: #6c757d;
-            margin-bottom: 20px;
-        }
-
-        .modal-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .internal-card {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            margin-bottom: 12px;
-        }
-
-        .team-count-selector {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 2px solid #8e44ad;
-        }
+        .strategy-slots { margin-top: 8px; padding: 12px; background: white; border-radius: 6px; }
+        .strategy-slot { margin-bottom: 8px; }
+        .tactics-section { margin-top: 12px; padding: 12px; background: #fff8e1; border-radius: 6px; border: 2px solid #ffc107; }
+        .tactics-title { font-size: 13px; font-weight: 700; color: #856404; margin-bottom: 8px; }
+        .tactics-slot { margin-bottom: 8px; }
+        .strategy-warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; }
+        .strategy-error { background: #f8d7da; border: 1px solid #dc3545; color: #721c24; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; }
+        .strategy-info { background: #d1ecf1; border: 1px solid #17a2b8; color: #0c5460; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; }
+        .duplicate-error { background: #f8d7da; border: 2px solid #dc3545; color: #721c24; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; font-weight: 600; }
+        .btn { width: 100%; padding: 14px; background: #8e44ad; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+        .btn:active { transform: scale(0.98); background: #7d3c98; }
+        .btn-secondary { background: #6c757d; }
+        .btn-danger { background: #dc3545; }
+        .btn-success { background: #28a745; }
+        .saved-formation-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 2px solid #dee2e6; }
+        .formation-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 12px; border-bottom: 1px solid #dee2e6; }
+        .formation-title-section { flex: 1; }
+        .formation-title { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
+        .formation-date { font-size: 12px; color: #6c757d; }
+        .accordion-icon { font-size: 24px; color: #6c757d; transition: transform 0.3s; user-select: none; }
+        .accordion-icon.open { transform: rotate(180deg); }
+        .formation-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .formation-content.open { max-height: 10000px; transition: max-height 0.5s ease-in; }
+        .formation-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #dee2e6; }
+        .formation-section-title { font-size: 14px; font-weight: 700; color: #6c757d; margin-bottom: 8px; }
+        .mini-team { background: #f8f9fa; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
+        .mini-team-header { font-size: 13px; font-weight: 600; color: #495057; margin-bottom: 6px; }
+        .mini-team-memo { font-size: 11px; color: #2e7d32; background: #e8f5e9; padding: 4px 8px; border-radius: 3px; margin-bottom: 6px; }
+        .mini-commander { font-size: 12px; color: #495057; margin-left: 8px; margin-bottom: 2px; }
+        .mini-strategy, .mini-tactics { font-size: 11px; color: #6c757d; margin-left: 16px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .loading { text-align: center; padding: 40px; color: #6c757d; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: white; border-radius: 12px; padding: 24px; max-width: 400px; width: 100%; }
+        .modal-title { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 16px; }
+        .modal-text { font-size: 14px; color: #6c757d; margin-bottom: 20px; }
+        .modal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .internal-card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 12px; }
+        .team-count-selector { background: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 2px solid #8e44ad; }
     </style>
 </head>
 <body>
     <div id="root"></div>
-
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef } = React;
-
         const SHEET_ID = '1s3q3t9Hk_LuVLnGLSFmPhcF8PjUILy8-CvBXWBtaSvI';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz0DpPZEkV8tgjb4AjN8aUAHsOJLjNo0SQj2gqlNFVMgxGhM40gmhMdqHNSMNpmydlXvw/exec';
         
         function App() {
             const [activeTab, setActiveTab] = useState('pvp');
@@ -594,106 +104,67 @@
             const [formations, setFormations] = useState([]);
             const [loading, setLoading] = useState(true);
             const [syncStatus, setSyncStatus] = useState('未同期');
-            const [editingFormationId, setEditingFormationId] = useState(null);
+            const [editingFormationName, setEditingFormationName] = useState(null);
             const [numPvpTeams, setNumPvpTeams] = useState(5);
             const [numSiegeTeams, setNumSiegeTeams] = useState(5);
-            
+            const [useSpreadsheet, setUseSpreadsheet] = useState(false);
             const [formationName, setFormationName] = useState('');
             const [pvpTeams, setPvpTeams] = useState([]);
             const [siegeTeams, setSiegeTeams] = useState([]);
             const [internalCommanders, setInternalCommanders] = useState(Array(10).fill(null).map(() => ({
-                commanderName: '',
-                strategies: ['', ''],
-                tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
+                commanderName: '', strategies: ['', ''], tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
             })));
             const [memo, setMemo] = useState('');
 
-            // 部隊数変更時に配列を調整
+            useEffect(() => {
+                if (SCRIPT_URL && SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbz0DpPZEkV8tgjb4AjN8aUAHsOJLjNo0SQj2gqlNFVMgxGhM40gmhMdqHNSMNpmydlXvw/exec') setUseSpreadsheet(true);
+            }, []);
+
             useEffect(() => {
                 const createEmptyTeam = (soldierType) => ({
-                    soldierType,
-                    memo: '',
-                    commanders: Array(3).fill(null).map(() => ({
-                        commanderName: '',
-                        strategies: ['', ''],
-                        tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
+                    soldierType, memo: '', commanders: Array(3).fill(null).map(() => ({
+                        commanderName: '', strategies: ['', ''], tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
                     }))
                 });
-
-                setPvpTeams(prev => {
-                    const newTeams = Array(numPvpTeams).fill(null).map((_, i) => 
-                        prev[i] || createEmptyTeam('槍')
-                    );
-                    return newTeams;
-                });
+                setPvpTeams(prev => Array(numPvpTeams).fill(null).map((_, i) => prev[i] || createEmptyTeam('槍')));
             }, [numPvpTeams]);
 
             useEffect(() => {
                 const createEmptyTeam = (soldierType) => ({
-                    soldierType,
-                    memo: '',
-                    commanders: Array(3).fill(null).map(() => ({
-                        commanderName: '',
-                        strategies: ['', ''],
-                        tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
+                    soldierType, memo: '', commanders: Array(3).fill(null).map(() => ({
+                        commanderName: '', strategies: ['', ''], tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
                     }))
                 });
-
-                setSiegeTeams(prev => {
-                    const newTeams = Array(numSiegeTeams).fill(null).map((_, i) => 
-                        prev[i] || createEmptyTeam('兵器')
-                    );
-                    return newTeams;
-                });
+                setSiegeTeams(prev => Array(numSiegeTeams).fill(null).map((_, i) => prev[i] || createEmptyTeam('兵器')));
             }, [numSiegeTeams]);
 
             const loadData = useCallback(async () => {
                 setLoading(true);
                 setSyncStatus('読み込み中...');
-                
                 try {
                     const commandersUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=武将一覧`;
                     const commandersResponse = await fetch(commandersUrl);
                     const commandersText = await commandersResponse.text();
                     const commandersParsed = Papa.parse(commandersText, { header: true });
-                    
-                    const commandersData = commandersParsed.data
-                        .filter(row => row['武将名'] && row['武将名'].trim())
-                        .map(row => ({
-                            name: row['武将名'],
-                            faction: row['陣営'] || '',
-                            stars: parseInt(row['凸数']) || 0,
-                            spear: row['槍'] || 'C',
-                            bow: row['弓'] || 'C',
-                            cavalry: row['馬'] || 'C',
-                            shield: row['盾'] || 'C',
-                            siege: row['兵器'] || 'C'
-                        }));
-                    
-                    setCommanders(commandersData);
+                    setCommanders(commandersParsed.data.filter(row => row['武将名'] && row['武将名'].trim()).map(row => ({
+                        name: row['武将名'], faction: row['陣営'] || '', stars: parseInt(row['凸数']) || 0,
+                        spear: row['槍'] || 'C', bow: row['弓'] || 'C', cavalry: row['馬'] || 'C',
+                        shield: row['盾'] || 'C', siege: row['兵器'] || 'C'
+                    })));
 
                     const strategiesUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=戦法一覧`;
                     const strategiesResponse = await fetch(strategiesUrl);
                     const strategiesText = await strategiesResponse.text();
                     const strategiesParsed = Papa.parse(strategiesText, { header: true });
-                    
-                    const strategiesData = strategiesParsed.data
-                        .filter(row => row['戦法名'] && row['戦法名'].trim())
-                        .map(row => ({
-                            name: row['戦法名'],
-                            type: row['種類'] || '',
-                            maxLearns: parseInt(row['学習数']) || 1
-                        }));
-                    
-                    setStrategies(strategiesData);
+                    setStrategies(strategiesParsed.data.filter(row => row['戦法名'] && row['戦法名'].trim()).map(row => ({
+                        name: row['戦法名'], type: row['種類'] || '', maxLearns: parseInt(row['学習数']) || 1
+                    })));
 
                     const tacticsUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=兵法一覧`;
                     const tacticsResponse = await fetch(tacticsUrl);
                     const tacticsText = await tacticsResponse.text();
                     const tacticsParsed = Papa.parse(tacticsText, { header: false });
-                    
                     const tacticsData = { slot1: [], slot2Map: {}, slot34Map: {} };
-                    
                     tacticsParsed.data.forEach(row => {
                         const slot1Value = row[0];
                         if (slot1Value && slot1Value !== '第1スロット' && !tacticsData.slot1.includes(slot1Value)) {
@@ -702,23 +173,19 @@
                             tacticsData.slot34Map[slot1Value] = [];
                         }
                     });
-
                     tacticsParsed.data.forEach(row => {
-                        const slot1Value = row[0];
-                        const slot2Value = row[1];
-                        const slot34Value = row[2];
-
+                        const slot1Value = row[0], slot2Value = row[1], slot34Value = row[2];
                         if (slot1Value && slot1Value !== '第1スロット') {
-                            if (slot2Value && slot2Value !== '第2スロット' && !tacticsData.slot2Map[slot1Value].includes(slot2Value)) {
+                            if (slot2Value && slot2Value !== '第2スロット' && !tacticsData.slot2Map[slot1Value].includes(slot2Value))
                                 tacticsData.slot2Map[slot1Value].push(slot2Value);
-                            }
-                            if (slot34Value && slot34Value !== '第3・4スロット' && !tacticsData.slot34Map[slot1Value].includes(slot34Value)) {
+                            if (slot34Value && slot34Value !== '第3・4スロット' && !tacticsData.slot34Map[slot1Value].includes(slot34Value))
                                 tacticsData.slot34Map[slot1Value].push(slot34Value);
-                            }
                         }
                     });
-
                     setTactics(tacticsData);
+
+                    if (useSpreadsheet) await loadFormationsFromSpreadsheet();
+                    else loadFormationsFromLocalStorage();
 
                     setSyncStatus('同期完了');
                     setTimeout(() => setSyncStatus(''), 2000);
@@ -726,191 +193,161 @@
                     console.error('エラー:', error);
                     setSyncStatus('エラー');
                 }
-                
                 setLoading(false);
-            }, []);
+            }, [useSpreadsheet]);
 
-            useEffect(() => {
-                loadData();
-            }, [loadData]);
+            const loadFormationsFromSpreadsheet = async () => {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'list' })
+                    });
+                    const result = await response.json();
+                    if (result.success && result.formations) {
+                        setFormations(result.formations.sort((a, b) => new Date(b.date) - new Date(a.date)));
+                    }
+                } catch (error) {
+                    console.error('スプレッドシート読み込みエラー:', error);
+                    loadFormationsFromLocalStorage();
+                }
+            };
 
-            useEffect(() => {
+            const loadFormationsFromLocalStorage = () => {
                 const saved = localStorage.getItem('formations_v3');
                 if (saved) {
                     try {
-                        const parsed = JSON.parse(saved);
-                        // 日時順にソート（新しい順）
-                        const sorted = parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
-                        setFormations(sorted);
-                    } catch (e) {
-                        console.error('編成データ読み込みエラー');
-                    }
+                        setFormations(JSON.parse(saved).sort((a, b) => new Date(b.date) - new Date(a.date)));
+                    } catch (e) { console.error('読み込みエラー'); }
                 }
-            }, []);
+            };
 
-            // 武将重複チェック（武将ごとの使用場所を返す）
+            useEffect(() => { loadData(); }, [loadData]);
+
             const getCommanderUsageMap = useCallback(() => {
                 const usageMap = {};
-
                 const recordUsage = (teams, teamType) => {
                     teams.forEach((team, teamIndex) => {
                         team.commanders.forEach((commander, cmdIndex) => {
                             if (commander.commanderName) {
-                                if (!usageMap[commander.commanderName]) {
-                                    usageMap[commander.commanderName] = [];
-                                }
+                                if (!usageMap[commander.commanderName]) usageMap[commander.commanderName] = [];
                                 usageMap[commander.commanderName].push(`${teamType}${teamIndex + 1}-武将${cmdIndex + 1}`);
                             }
                         });
                     });
                 };
-
                 recordUsage(pvpTeams, '対人');
                 recordUsage(siegeTeams, '攻城');
                 internalCommanders.forEach((commander, index) => {
                     if (commander.commanderName) {
-                        if (!usageMap[commander.commanderName]) {
-                            usageMap[commander.commanderName] = [];
-                        }
+                        if (!usageMap[commander.commanderName]) usageMap[commander.commanderName] = [];
                         usageMap[commander.commanderName].push(`内政${index + 1}`);
                     }
                 });
-
                 return usageMap;
             }, [pvpTeams, siegeTeams, internalCommanders]);
 
             const calculateStrategyUsage = useCallback(() => {
                 const usage = {};
-                
                 const countStrategies = (teams) => {
                     teams.forEach(team => {
                         team.commanders.forEach(commander => {
                             commander.strategies.forEach(strategyName => {
-                                if (strategyName) {
-                                    usage[strategyName] = (usage[strategyName] || 0) + 1;
-                                }
+                                if (strategyName) usage[strategyName] = (usage[strategyName] || 0) + 1;
                             });
                         });
                     });
                 };
-
                 countStrategies(pvpTeams);
                 countStrategies(siegeTeams);
                 internalCommanders.forEach(commander => {
                     commander.strategies.forEach(strategyName => {
-                        if (strategyName) {
-                            usage[strategyName] = (usage[strategyName] || 0) + 1;
-                        }
+                        if (strategyName) usage[strategyName] = (usage[strategyName] || 0) + 1;
                     });
                 });
-
                 return usage;
             }, [pvpTeams, siegeTeams, internalCommanders]);
 
             const validateStrategy = (strategyName) => {
                 if (!strategyName) return { valid: true };
-                
                 const strategy = strategies.find(s => s.name === strategyName);
                 if (!strategy) return { valid: true };
-
                 const usage = calculateStrategyUsage();
                 const currentUsage = usage[strategyName] || 0;
-
                 if (currentUsage > strategy.maxLearns) {
-                    return {
-                        valid: false,
-                        error: `${strategy.name}は学習上限(${strategy.maxLearns}回)を超えています (使用: ${currentUsage}回)`
-                    };
+                    return { valid: false, error: `${strategy.name}は学習上限(${strategy.maxLearns}回)を超えています (使用: ${currentUsage}回)` };
                 }
-
                 if (currentUsage === strategy.maxLearns) {
-                    return {
-                        valid: true,
-                        warning: `${strategy.name}の学習回数が上限に達しています (${currentUsage}/${strategy.maxLearns})`
-                    };
+                    return { valid: true, warning: `${strategy.name}の学習回数が上限に達しています (${currentUsage}/${strategy.maxLearns})` };
                 }
-
-                return {
-                    valid: true,
-                    info: `${strategy.name} (使用: ${currentUsage}/${strategy.maxLearns})`
-                };
+                return { valid: true, info: `${strategy.name} (使用: ${currentUsage}/${strategy.maxLearns})` };
             };
 
             const [showSaveModal, setShowSaveModal] = useState(false);
 
             const handleSaveClick = () => {
-                if (!formationName.trim()) {
-                    alert('編成名を入力してください');
-                    return;
-                }
-
+                if (!formationName.trim()) { alert('編成名を入力してください'); return; }
                 const usageMap = getCommanderUsageMap();
                 const duplicates = Object.entries(usageMap).filter(([_, locations]) => locations.length > 1);
-                
                 if (duplicates.length > 0) {
-                    const errorMsg = duplicates.map(([name, locations]) => 
-                        `${name}: ${locations.join(', ')}`
-                    ).join('\n');
-                    alert('武将の重複エラー:\n' + errorMsg);
+                    alert('武将の重複エラー:\n' + duplicates.map(([name, locations]) => `${name}: ${locations.join(', ')}`).join('\n'));
                     return;
                 }
-                
-                if (editingFormationId !== null) {
-                    setShowSaveModal(true);
-                } else {
-                    saveAsNew();
-                }
+                if (editingFormationName) setShowSaveModal(true);
+                else saveAsNew();
             };
 
-            const saveAsNew = () => {
-                const formationData = {
-                    name: formationName,
-                    date: new Date().toISOString().split('T')[0],
-                    pvpTeams,
-                    siegeTeams,
-                    internalCommanders,
-                    memo
-                };
-
-                const saved = [formationData, ...formations].sort((a, b) => new Date(b.date) - new Date(a.date));
-                setFormations(saved);
-                localStorage.setItem('formations_v3', JSON.stringify(saved));
-                
+            const saveAsNew = async () => {
+                const formationData = { name: formationName, date: new Date().toISOString().split('T')[0], pvpTeams, siegeTeams, internalCommanders, memo };
+                if (useSpreadsheet) {
+                    setSyncStatus('保存中...');
+                    try {
+                        await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'create', data: formationData })
+                        });
+                        setSyncStatus('保存完了');
+                        await loadFormationsFromSpreadsheet();
+                    } catch (error) { console.error('保存エラー:', error); setSyncStatus('保存エラー'); }
+                } else {
+                    const saved = [formationData, ...formations].sort((a, b) => new Date(b.date) - new Date(a.date));
+                    setFormations(saved);
+                    localStorage.setItem('formations_v3', JSON.stringify(saved));
+                }
                 setShowSaveModal(false);
-                setEditingFormationId(null);
+                setEditingFormationName(null);
                 alert('新規編成として保存しました！');
             };
 
-            const saveOverwrite = () => {
-                const formationData = {
-                    name: formationName,
-                    date: new Date().toISOString().split('T')[0],
-                    pvpTeams,
-                    siegeTeams,
-                    internalCommanders,
-                    memo
-                };
-
-                const updated = formations.map((f, i) => 
-                    i === editingFormationId ? formationData : f
-                ).sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                setFormations(updated);
-                localStorage.setItem('formations_v3', JSON.stringify(updated));
-                
+            const saveOverwrite = async () => {
+                const formationData = { name: formationName, date: new Date().toISOString().split('T')[0], pvpTeams, siegeTeams, internalCommanders, memo };
+                if (useSpreadsheet) {
+                    setSyncStatus('保存中...');
+                    try {
+                        await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'update', formationName: editingFormationName, data: formationData })
+                        });
+                        setSyncStatus('保存完了');
+                        await loadFormationsFromSpreadsheet();
+                    } catch (error) { console.error('保存エラー:', error); setSyncStatus('保存エラー'); }
+                } else {
+                    const updated = formations.map(f => f.name === editingFormationName ? formationData : f).sort((a, b) => new Date(b.date) - new Date(a.date));
+                    setFormations(updated);
+                    localStorage.setItem('formations_v3', JSON.stringify(updated));
+                }
                 setShowSaveModal(false);
-                setEditingFormationId(null);
+                setEditingFormationName(null);
                 alert('編成を上書き保存しました！');
             };
 
-            const loadFormation = (formation, index) => {
-                setEditingFormationId(index);
+            const loadFormation = (formation) => {
+                setEditingFormationName(formation.name);
                 setFormationName(formation.name);
-                
-                // 部隊数を調整
                 setNumPvpTeams(formation.pvpTeams.length);
                 setNumSiegeTeams(formation.siegeTeams.length);
-                
                 setPvpTeams(formation.pvpTeams);
                 setSiegeTeams(formation.siegeTeams);
                 setInternalCommanders(formation.internalCommanders);
@@ -918,140 +355,101 @@
                 setActiveTab('pvp');
             };
 
-            const deleteFormation = (index) => {
-                if (!confirm('この編成を削除しますか？')) return;
-                
-                const updated = formations.filter((_, i) => i !== index);
-                setFormations(updated);
-                localStorage.setItem('formations_v3', JSON.stringify(updated));
+            const copyFormation = (formation) => {
+                const newName = prompt('新しい編成名を入力してください:', formation.name + ' (コピー)');
+                if (!newName) return;
+                setEditingFormationName(null);
+                setFormationName(newName);
+                setNumPvpTeams(formation.pvpTeams.length);
+                setNumSiegeTeams(formation.siegeTeams.length);
+                setPvpTeams(JSON.parse(JSON.stringify(formation.pvpTeams)));
+                setSiegeTeams(JSON.parse(JSON.stringify(formation.siegeTeams)));
+                setInternalCommanders(JSON.parse(JSON.stringify(formation.internalCommanders)));
+                setMemo(formation.memo || '');
+                setActiveTab('pvp');
+                alert('編成をコピーしました。編集して保存してください。');
             };
 
-            if (loading) {
-                return (
-                    <div className="app-container">
-                        <div className="header">
-                            <h1>⚔️ 三国志新戦</h1>
-                            <p>部隊編成ツール v3.1</p>
-                        </div>
-                        <div className="loading">データを読み込み中...</div>
-                    </div>
-                );
-            }
+            const deleteFormation = async (formation) => {
+                if (!confirm('この編成を削除しますか？')) return;
+                if (useSpreadsheet) {
+                    setSyncStatus('削除中...');
+                    try {
+                        await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'delete', formationName: formation.name })
+                        });
+                        setSyncStatus('削除完了');
+                        await loadFormationsFromSpreadsheet();
+                    } catch (error) { console.error('削除エラー:', error); setSyncStatus('削除エラー'); }
+                } else {
+                    const updated = formations.filter(f => f.name !== formation.name);
+                    setFormations(updated);
+                    localStorage.setItem('formations_v3', JSON.stringify(updated));
+                }
+            };
+
+            if (loading) return (
+                <div className="app-container">
+                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.2</p></div>
+                    <div className="loading">データを読み込み中...</div>
+                </div>
+            );
 
             return (
                 <div className="app-container">
                     <div className="header">
                         <h1>⚔️ 三国志新戦</h1>
-                        <p>部隊編成ツール v3.1</p>
-                        <div className="sync-status">
-                            {syncStatus || 'スタンバイ'}
-                            <button className="sync-btn" onClick={loadData}>🔄 再読込</button>
-                        </div>
+                        <p>部隊編成ツール v3.2 {useSpreadsheet && '(スプレッドシート連携)'}</p>
+                        <div className="sync-status">{syncStatus || 'スタンバイ'}<button className="sync-btn" onClick={loadData}>🔄 再読込</button></div>
                     </div>
-
                     <div className="tabs">
                         <button className={`tab ${activeTab === 'pvp' ? 'active' : ''}`} onClick={() => setActiveTab('pvp')}>対人戦</button>
                         <button className={`tab ${activeTab === 'siege' ? 'active' : ''}`} onClick={() => setActiveTab('siege')}>攻城</button>
                         <button className={`tab ${activeTab === 'internal' ? 'active' : ''}`} onClick={() => setActiveTab('internal')}>内政</button>
                         <button className={`tab ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>保存済み</button>
                     </div>
-
                     <div className="content">
                         {activeTab === 'pvp' && (
                             <>
                                 <div className="team-count-selector">
                                     <label className="input-label">対人戦部隊数</label>
                                     <select value={numPvpTeams} onChange={(e) => setNumPvpTeams(parseInt(e.target.value))}>
-                                        {[1,2,3,4,5,6,7,8].map(n => (
-                                            <option key={n} value={n}>{n}部隊</option>
-                                        ))}
+                                        {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}部隊</option>)}
                                     </select>
                                 </div>
-                                <Teams 
-                                    teams={pvpTeams}
-                                    setTeams={setPvpTeams}
-                                    title="対人戦部隊"
-                                    commanders={commanders}
-                                    strategies={strategies}
-                                    tactics={tactics}
-                                    validateStrategy={validateStrategy}
-                                    getCommanderUsageMap={getCommanderUsageMap}
-                                />
+                                <Teams teams={pvpTeams} setTeams={setPvpTeams} title="対人戦部隊" commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} />
                             </>
                         )}
-
                         {activeTab === 'siege' && (
                             <>
                                 <div className="team-count-selector">
                                     <label className="input-label">攻城部隊数</label>
                                     <select value={numSiegeTeams} onChange={(e) => setNumSiegeTeams(parseInt(e.target.value))}>
-                                        {[1,2,3,4,5,6,7,8].map(n => (
-                                            <option key={n} value={n}>{n}部隊</option>
-                                        ))}
+                                        {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}部隊</option>)}
                                     </select>
                                 </div>
-                                <Teams 
-                                    teams={siegeTeams}
-                                    setTeams={setSiegeTeams}
-                                    title="攻城部隊"
-                                    commanders={commanders}
-                                    strategies={strategies}
-                                    tactics={tactics}
-                                    validateStrategy={validateStrategy}
-                                    getCommanderUsageMap={getCommanderUsageMap}
-                                />
+                                <Teams teams={siegeTeams} setTeams={setSiegeTeams} title="攻城部隊" commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} />
                             </>
                         )}
-
-                        {activeTab === 'internal' && (
-                            <InternalCommanders 
-                                internalCommanders={internalCommanders}
-                                setInternalCommanders={setInternalCommanders}
-                                commanders={commanders}
-                                strategies={strategies}
-                                tactics={tactics}
-                                validateStrategy={validateStrategy}
-                                getCommanderUsageMap={getCommanderUsageMap}
-                            />
-                        )}
-
-                        {activeTab === 'saved' && (
-                            <SavedFormations 
-                                formations={formations}
-                                commanders={commanders}
-                                strategies={strategies}
-                                loadFormation={loadFormation}
-                                deleteFormation={deleteFormation}
-                            />
-                        )}
-
+                        {activeTab === 'internal' && <InternalCommanders internalCommanders={internalCommanders} setInternalCommanders={setInternalCommanders} commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} />}
+                        {activeTab === 'saved' && <SavedFormations formations={formations} commanders={commanders} strategies={strategies} loadFormation={loadFormation} copyFormation={copyFormation} deleteFormation={deleteFormation} />}
                         {activeTab !== 'saved' && (
                             <div className="section">
                                 <div className="input-group">
-                                    <label className="input-label">編成名 {editingFormationId !== null && '(編集中)'}</label>
-                                    <input 
-                                        type="text"
-                                        value={formationName}
-                                        onChange={(e) => setFormationName(e.target.value)}
-                                        placeholder="例：シーズン3対人編成"
-                                    />
+                                    <label className="input-label">編成名 {editingFormationName && '(編集中)'}</label>
+                                    <input type="text" value={formationName} onChange={(e) => setFormationName(e.target.value)} placeholder="例：シーズン3対人編成" />
                                 </div>
                                 <div className="input-group">
                                     <label className="input-label">メモ</label>
-                                    <textarea 
-                                        value={memo}
-                                        onChange={(e) => setMemo(e.target.value)}
-                                        placeholder="編成のコンセプトや注意点など"
-                                    />
+                                    <textarea value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="編成のコンセプトや注意点など" />
                                 </div>
                                 <button className="btn" onClick={handleSaveClick}>💾 編成を保存</button>
-                                {editingFormationId !== null && (
-                                    <button className="btn btn-secondary" onClick={() => setEditingFormationId(null)}>✕ 編集をキャンセル</button>
-                                )}
+                                {editingFormationName && <button className="btn btn-secondary" onClick={() => setEditingFormationName(null)}>✕ 編集をキャンセル</button>}
                             </div>
                         )}
                     </div>
-
                     {showSaveModal && (
                         <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -1073,23 +471,15 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [isOpen, setIsOpen] = useState(false);
             const containerRef = useRef(null);
-
             useEffect(() => {
                 const handleClickOutside = (event) => {
-                    if (containerRef.current && !containerRef.current.contains(event.target)) {
-                        setIsOpen(false);
-                    }
+                    if (containerRef.current && !containerRef.current.contains(event.target)) setIsOpen(false);
                 };
                 document.addEventListener('mousedown', handleClickOutside);
                 return () => document.removeEventListener('mousedown', handleClickOutside);
             }, []);
-
-            const filteredOptions = options.filter(option => 
-                renderOption(option).toLowerCase().includes(searchTerm.toLowerCase())
-            );
-
+            const filteredOptions = options.filter(option => renderOption(option).toLowerCase().includes(searchTerm.toLowerCase()));
             const selectedOption = options.find(opt => opt.name === value);
-
             return (
                 <div className="search-select-container" ref={containerRef}>
                     {selectedOption ? (
@@ -1099,22 +489,11 @@
                         </div>
                     ) : (
                         <>
-                            <input
-                                type="text"
-                                className="search-input"
-                                value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); setIsOpen(true); }}
-                                onFocus={() => setIsOpen(true)}
-                                placeholder={placeholder}
-                            />
+                            <input type="text" className="search-input" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setIsOpen(true); }} onFocus={() => setIsOpen(true)} placeholder={placeholder} />
                             {isOpen && filteredOptions.length > 0 && (
                                 <div className="search-dropdown">
                                     {filteredOptions.map(option => (
-                                        <div
-                                            key={option.name}
-                                            className="search-option"
-                                            onClick={() => { onChange(option.name); setSearchTerm(''); setIsOpen(false); }}
-                                        >
+                                        <div key={option.name} className="search-option" onClick={() => { onChange(option.name); setSearchTerm(''); setIsOpen(false); }}>
                                             {renderOption(option)}
                                         </div>
                                     ))}
@@ -1129,11 +508,9 @@
         function TacticsSelector({ tactics, commanderTactics, updateTactics }) {
             const slot2Options = commanderTactics.slot1 ? tactics.slot2Map[commanderTactics.slot1] || [] : [];
             const slot34Options = commanderTactics.slot1 ? tactics.slot34Map[commanderTactics.slot1] || [] : [];
-
             return (
                 <div className="tactics-section">
                     <div className="tactics-title">兵法設定</div>
-                    
                     <div className="tactics-slot">
                         <label className="input-label">第1スロット</label>
                         <select value={commanderTactics.slot1} onChange={(e) => updateTactics({ slot1: e.target.value, slot2: '', slot3: '', slot4: '' })}>
@@ -1141,7 +518,6 @@
                             {tactics.slot1.map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
                     </div>
-
                     {commanderTactics.slot1 && (
                         <div className="tactics-slot">
                             <label className="input-label">第2スロット</label>
@@ -1151,7 +527,6 @@
                             </select>
                         </div>
                     )}
-
                     {commanderTactics.slot1 && (
                         <>
                             <div className="tactics-slot">
@@ -1180,30 +555,22 @@
                 updated[teamIndex] = { ...updated[teamIndex], [field]: value };
                 setTeams(updated);
             };
-
             const updateCommander = (teamIndex, commanderIndex, field, value) => {
                 const updated = [...teams];
-                updated[teamIndex].commanders[commanderIndex] = {
-                    ...updated[teamIndex].commanders[commanderIndex],
-                    [field]: value
-                };
+                updated[teamIndex].commanders[commanderIndex] = { ...updated[teamIndex].commanders[commanderIndex], [field]: value };
                 setTeams(updated);
             };
-
             const updateStrategy = (teamIndex, commanderIndex, strategyIndex, value) => {
                 const updated = [...teams];
                 updated[teamIndex].commanders[commanderIndex].strategies[strategyIndex] = value;
                 setTeams(updated);
             };
-
             const updateTacticsSlot = (teamIndex, commanderIndex, tacticsData) => {
                 const updated = [...teams];
                 updated[teamIndex].commanders[commanderIndex].tactics = tacticsData;
                 setTeams(updated);
             };
-
             const usageMap = getCommanderUsageMap();
-
             return (
                 <div className="section">
                     <div className="section-title">{title}</div>
@@ -1211,31 +578,18 @@
                         {teams.map((team, teamIndex) => (
                             <div key={teamIndex} className="team-card">
                                 <h3>部隊 {teamIndex + 1}</h3>
-                                
                                 <div className="input-group">
                                     <label className="input-label">兵種</label>
                                     <div className="soldier-types">
                                         {['槍', '弓', '馬', '盾', '兵器'].map(type => (
-                                            <button
-                                                key={type}
-                                                className={`soldier-type-btn ${team.soldierType === type ? 'active' : ''}`}
-                                                onClick={() => updateTeam(teamIndex, 'soldierType', type)}
-                                            >
-                                                {type}
-                                            </button>
+                                            <button key={type} className={`soldier-type-btn ${team.soldierType === type ? 'active' : ''}`} onClick={() => updateTeam(teamIndex, 'soldierType', type)}>{type}</button>
                                         ))}
                                     </div>
                                 </div>
-
                                 <div className="input-group">
                                     <label className="input-label">部隊メモ</label>
-                                    <textarea 
-                                        value={team.memo}
-                                        onChange={(e) => updateTeam(teamIndex, 'memo', e.target.value)}
-                                        placeholder="この部隊の使い方など"
-                                    />
+                                    <textarea value={team.memo} onChange={(e) => updateTeam(teamIndex, 'memo', e.target.value)} placeholder="この部隊の使い方など" />
                                 </div>
-
                                 {team.commanders.map((commander, commanderIndex) => (
                                     <div key={commanderIndex} className="commander-slot">
                                         <div className="input-group">
@@ -1249,32 +603,18 @@
                                                 renderValue={(cmd) => {
                                                     const aptKey = team.soldierType === '槍' ? 'spear' : team.soldierType === '弓' ? 'bow' : team.soldierType === '馬' ? 'cavalry' : team.soldierType === '盾' ? 'shield' : 'siege';
                                                     const apt = cmd[aptKey];
-                                                    return (
-                                                        <>
-                                                            {cmd.name} [{cmd.faction}] ★{cmd.stars}
-                                                            <span className={`aptitude-badge aptitude-${apt}`}>{team.soldierType}: {apt}</span>
-                                                        </>
-                                                    );
+                                                    return (<>{cmd.name} [{cmd.faction}] ★{cmd.stars}<span className={`aptitude-badge aptitude-${apt}`}>{team.soldierType}: {apt}</span></>);
                                                 }}
                                             />
                                             {commander.commanderName && usageMap[commander.commanderName] && usageMap[commander.commanderName].length > 1 && (
-                                                <div className="duplicate-error">
-                                                    ⚠️ 重複: {usageMap[commander.commanderName].join(', ')}
-                                                </div>
+                                                <div className="duplicate-error">⚠️ 重複: {usageMap[commander.commanderName].join(', ')}</div>
                                             )}
                                         </div>
-
                                         <div className="strategy-slots">
                                             {commander.strategies.map((strategyName, strategyIndex) => (
                                                 <div key={strategyIndex} className="strategy-slot">
                                                     <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                                    <SearchableSelect
-                                                        value={strategyName}
-                                                        onChange={(value) => updateStrategy(teamIndex, commanderIndex, strategyIndex, value)}
-                                                        options={strategies}
-                                                        placeholder="戦法を検索..."
-                                                        renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`}
-                                                    />
+                                                    <SearchableSelect value={strategyName} onChange={(value) => updateStrategy(teamIndex, commanderIndex, strategyIndex, value)} options={strategies} placeholder="戦法を検索..." renderOption={(strat) => `${strat.name} [${strat.type}] (学習${strat.maxLearns}回)`} />
                                                     {strategyName && (() => {
                                                         const validation = validateStrategy(strategyName);
                                                         if (!validation.valid) return <div className="strategy-error">{validation.error}</div>;
@@ -1284,12 +624,7 @@
                                                 </div>
                                             ))}
                                         </div>
-
-                                        <TacticsSelector 
-                                            tactics={tactics}
-                                            commanderTactics={commander.tactics}
-                                            updateTactics={(tacticsData) => updateTacticsSlot(teamIndex, commanderIndex, tacticsData)}
-                                        />
+                                        <TacticsSelector tactics={tactics} commanderTactics={commander.tactics} updateTactics={(tacticsData) => updateTacticsSlot(teamIndex, commanderIndex, tacticsData)} />
                                     </div>
                                 ))}
                             </div>
@@ -1305,55 +640,35 @@
                 updated[index] = { ...updated[index], [field]: value };
                 setInternalCommanders(updated);
             };
-
             const updateStrategy = (index, strategyIndex, value) => {
                 const updated = [...internalCommanders];
                 updated[index].strategies[strategyIndex] = value;
                 setInternalCommanders(updated);
             };
-
             const updateTacticsSlot = (index, tacticsData) => {
                 const updated = [...internalCommanders];
                 updated[index].tactics = tacticsData;
                 setInternalCommanders(updated);
             };
-
             const usageMap = getCommanderUsageMap();
-
             return (
                 <div className="section">
                     <div className="section-title">内政武将 (10人)</div>
                     {internalCommanders.map((commander, index) => (
                         <div key={index} className="internal-card">
                             <h4>内政武将 {index + 1}</h4>
-                            
                             <div className="input-group">
                                 <label className="input-label">武将</label>
-                                <SearchableSelect
-                                    value={commander.commanderName}
-                                    onChange={(value) => updateCommander(index, 'commanderName', value)}
-                                    options={commanders}
-                                    placeholder="武将を検索..."
-                                    renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`}
-                                />
+                                <SearchableSelect value={commander.commanderName} onChange={(value) => updateCommander(index, 'commanderName', value)} options={commanders} placeholder="武将を検索..." renderOption={(cmd) => `${cmd.name} [${cmd.faction}] ★${cmd.stars}`} />
                                 {commander.commanderName && usageMap[commander.commanderName] && usageMap[commander.commanderName].length > 1 && (
-                                    <div className="duplicate-error">
-                                        ⚠️ 重複: {usageMap[commander.commanderName].join(', ')}
-                                    </div>
+                                    <div className="duplicate-error">⚠️ 重複: {usageMap[commander.commanderName].join(', ')}</div>
                                 )}
                             </div>
-
                             <div className="strategy-slots">
                                 {commander.strategies.map((strategyName, strategyIndex) => (
                                     <div key={strategyIndex} className="strategy-slot">
                                         <label className="input-label">戦法 {strategyIndex + 1}</label>
-                                        <SearchableSelect
-                                            value={strategyName}
-                                            onChange={(value) => updateStrategy(index, strategyIndex, value)}
-                                            options={strategies}
-                                            placeholder="戦法を検索..."
-                                            renderOption={(strat) => `${strat.name} [${strat.type}]`}
-                                        />
+                                        <SearchableSelect value={strategyName} onChange={(value) => updateStrategy(index, strategyIndex, value)} options={strategies} placeholder="戦法を検索..." renderOption={(strat) => `${strat.name} [${strat.type}]`} />
                                         {strategyName && (() => {
                                             const validation = validateStrategy(strategyName);
                                             if (!validation.valid) return <div className="strategy-error">{validation.error}</div>;
@@ -1363,41 +678,27 @@
                                     </div>
                                 ))}
                             </div>
-
-                            <TacticsSelector 
-                                tactics={tactics}
-                                commanderTactics={commander.tactics}
-                                updateTactics={(tacticsData) => updateTacticsSlot(index, tacticsData)}
-                            />
+                            <TacticsSelector tactics={tactics} commanderTactics={commander.tactics} updateTactics={(tacticsData) => updateTacticsSlot(index, tacticsData)} />
                         </div>
                     ))}
                 </div>
             );
         }
 
-        function SavedFormations({ formations, commanders, strategies, loadFormation, deleteFormation }) {
+        function SavedFormations({ formations, commanders, strategies, loadFormation, copyFormation, deleteFormation }) {
             const [openIndex, setOpenIndex] = useState(null);
-
-            if (formations.length === 0) {
-                return (
-                    <div style={{textAlign: 'center', padding: '40px', color: '#6c757d'}}>
-                        <div style={{fontSize: '48px'}}>📋</div>
-                        <div>保存された編成はまだありません</div>
-                    </div>
-                );
-            }
-
-            const getCommanderName = (commanderName) => {
-                return commanderName || '未設定';
-            };
-
+            if (formations.length === 0) return (
+                <div style={{textAlign: 'center', padding: '40px', color: '#6c757d'}}>
+                    <div style={{fontSize: '48px'}}>📋</div>
+                    <div>保存された編成はまだありません</div>
+                </div>
+            );
             const getAptitude = (commanderName, soldierType) => {
                 const commander = commanders.find(c => c.name === commanderName);
                 if (!commander) return '';
                 const aptKey = soldierType === '槍' ? 'spear' : soldierType === '弓' ? 'bow' : soldierType === '馬' ? 'cavalry' : soldierType === '盾' ? 'shield' : 'siege';
                 return commander[aptKey];
             };
-
             return (
                 <div className="section">
                     <div className="section-title">保存済み編成 (新しい順)</div>
@@ -1410,43 +711,29 @@
                                 </div>
                                 <div className={`accordion-icon ${openIndex === index ? 'open' : ''}`}>▼</div>
                             </div>
-
                             <div className={`formation-content ${openIndex === index ? 'open' : ''}`}>
-                                {formation.memo && (
-                                    <div style={{background: '#f8f9fa', padding: '10px', borderRadius: '6px', fontSize: '13px', marginTop: '12px'}}>
-                                        {formation.memo}
-                                    </div>
-                                )}
-
+                                {formation.memo && <div style={{background: '#f8f9fa', padding: '10px', borderRadius: '6px', fontSize: '13px', marginTop: '12px'}}>{formation.memo}</div>}
                                 <div className="formation-section">
                                     <div className="formation-section-title">対人戦部隊</div>
                                     {formation.pvpTeams && formation.pvpTeams.map((team, teamIndex) => {
                                         const hasCommanders = team.commanders.some(c => c.commanderName);
                                         if (!hasCommanders) return null;
-                                        
                                         return (
                                             <div key={teamIndex} className="mini-team">
-                                                <div className="mini-team-header">
-                                                    部隊{teamIndex + 1} [{team.soldierType}]
-                                                </div>
+                                                <div className="mini-team-header">部隊{teamIndex + 1} [{team.soldierType}]</div>
                                                 {team.memo && <div className="mini-team-memo">💡 {team.memo}</div>}
                                                 {team.commanders.map((commander, cmdIndex) => {
                                                     if (!commander.commanderName) return null;
                                                     const apt = getAptitude(commander.commanderName, team.soldierType);
                                                     return (
                                                         <div key={cmdIndex}>
-                                                            <div className="mini-commander">
-                                                                • {getCommanderName(commander.commanderName)}
-                                                                {apt && <span className={`aptitude-badge aptitude-${apt}`}>{apt}</span>}
-                                                            </div>
+                                                            <div className="mini-commander">• {commander.commanderName}{apt && <span className={`aptitude-badge aptitude-${apt}`}>{apt}</span>}</div>
                                                             {commander.strategies.map((strat, sIndex) => {
                                                                 if (!strat) return null;
                                                                 return <div key={sIndex} className="mini-strategy">└ 戦法: {strat}</div>;
                                                             })}
                                                             {(commander.tactics.slot1 || commander.tactics.slot2 || commander.tactics.slot3 || commander.tactics.slot4) && (
-                                                                <div className="mini-tactics">
-                                                                    └ 兵法: {[commander.tactics.slot1, commander.tactics.slot2, commander.tactics.slot3, commander.tactics.slot4].filter(Boolean).join(', ')}
-                                                                </div>
+                                                                <div className="mini-tactics">└ 兵法: {[commander.tactics.slot1, commander.tactics.slot2, commander.tactics.slot3, commander.tactics.slot4].filter(Boolean).join(', ')}</div>
                                                             )}
                                                         </div>
                                                     );
@@ -1455,36 +742,27 @@
                                         );
                                     })}
                                 </div>
-
                                 <div className="formation-section">
                                     <div className="formation-section-title">攻城部隊</div>
                                     {formation.siegeTeams && formation.siegeTeams.map((team, teamIndex) => {
                                         const hasCommanders = team.commanders.some(c => c.commanderName);
                                         if (!hasCommanders) return null;
-                                        
                                         return (
                                             <div key={teamIndex} className="mini-team">
-                                                <div className="mini-team-header">
-                                                    攻城{teamIndex + 1} [兵器]
-                                                </div>
+                                                <div className="mini-team-header">攻城{teamIndex + 1} [兵器]</div>
                                                 {team.memo && <div className="mini-team-memo">💡 {team.memo}</div>}
                                                 {team.commanders.map((commander, cmdIndex) => {
                                                     if (!commander.commanderName) return null;
                                                     const apt = getAptitude(commander.commanderName, '兵器');
                                                     return (
                                                         <div key={cmdIndex}>
-                                                            <div className="mini-commander">
-                                                                • {getCommanderName(commander.commanderName)}
-                                                                {apt && <span className={`aptitude-badge aptitude-${apt}`}>{apt}</span>}
-                                                            </div>
+                                                            <div className="mini-commander">• {commander.commanderName}{apt && <span className={`aptitude-badge aptitude-${apt}`}>{apt}</span>}</div>
                                                             {commander.strategies.map((strat, sIndex) => {
                                                                 if (!strat) return null;
                                                                 return <div key={sIndex} className="mini-strategy">└ 戦法: {strat}</div>;
                                                             })}
                                                             {(commander.tactics.slot1 || commander.tactics.slot2 || commander.tactics.slot3 || commander.tactics.slot4) && (
-                                                                <div className="mini-tactics">
-                                                                    └ 兵法: {[commander.tactics.slot1, commander.tactics.slot2, commander.tactics.slot3, commander.tactics.slot4].filter(Boolean).join(', ')}
-                                                                </div>
+                                                                <div className="mini-tactics">└ 兵法: {[commander.tactics.slot1, commander.tactics.slot2, commander.tactics.slot3, commander.tactics.slot4].filter(Boolean).join(', ')}</div>
                                                             )}
                                                         </div>
                                                     );
@@ -1493,7 +771,6 @@
                                         );
                                     })}
                                 </div>
-
                                 <div className="formation-section">
                                     <div className="formation-section-title">内政武将</div>
                                     {formation.internalCommanders && formation.internalCommanders.filter(c => c.commanderName).length > 0 ? (
@@ -1501,15 +778,13 @@
                                             if (!commander.commanderName) return null;
                                             return (
                                                 <div key={cmdIndex} className="mini-team">
-                                                    <div className="mini-commander">• {getCommanderName(commander.commanderName)}</div>
+                                                    <div className="mini-commander">• {commander.commanderName}</div>
                                                     {commander.strategies.map((strat, sIndex) => {
                                                         if (!strat) return null;
                                                         return <div key={sIndex} className="mini-strategy">└ 戦法: {strat}</div>;
                                                     })}
                                                     {(commander.tactics.slot1 || commander.tactics.slot2 || commander.tactics.slot3 || commander.tactics.slot4) && (
-                                                        <div className="mini-tactics">
-                                                            └ 兵法: {[commander.tactics.slot1, commander.tactics.slot2, commander.tactics.slot3, commander.tactics.slot4].filter(Boolean).join(', ')}
-                                                        </div>
+                                                        <div className="mini-tactics">└ 兵法: {[commander.tactics.slot1, commander.tactics.slot2, commander.tactics.slot3, commander.tactics.slot4].filter(Boolean).join(', ')}</div>
                                                     )}
                                                 </div>
                                             );
@@ -1518,10 +793,10 @@
                                         <div style={{color: '#adb5bd', fontSize: '13px'}}>未設定</div>
                                     )}
                                 </div>
-
                                 <div className="action-buttons">
-                                    <button className="btn" onClick={() => loadFormation(formation, index)}>📝 編集</button>
-                                    <button className="btn btn-danger" onClick={() => deleteFormation(index)}>🗑️ 削除</button>
+                                    <button className="btn" onClick={() => loadFormation(formation)}>📝 編集</button>
+                                    <button className="btn btn-secondary" onClick={() => copyFormation(formation)}>📋 コピー</button>
+                                    <button className="btn btn-danger" onClick={() => deleteFormation(formation)}>🗑️ 削除</button>
                                 </div>
                             </div>
                         </div>
