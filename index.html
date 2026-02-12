@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>三国志新戦 部隊編成ツール v3.3</title>
+    <title>三国志新戦 部隊編成ツール v3.4</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -438,7 +438,7 @@
 
             if (loading) return (
                 <div className="app-container">
-                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.3</p></div>
+                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.4</p></div>
                     <div className="loading">データを読み込み中...</div>
                 </div>
             );
@@ -447,7 +447,7 @@
                 <div className="app-container">
                     <div className="header">
                         <h1>⚔️ 三国志新戦</h1>
-                        <p>部隊編成ツール v3.3</p>
+                        <p>部隊編成ツール v3.4</p>
                         <div className="storage-info">
                             💾 保存先: {useSpreadsheet ? 'スプレッドシート' : 'ローカルストレージ'}
                             {!useSpreadsheet && (
@@ -630,33 +630,84 @@
         }
 
         // 画像アップロードコンポーネント
-        function ImageUpload({ teamImages, setTeamImages, teamIndex, formationName }) {
+        function ImageUpload({ teamImages, setTeamImages, teamIndex, teamType, formationName }) {
             const fileInputRef = useRef(null);
             const [imageModalSrc, setImageModalSrc] = useState(null);
+            const [uploading, setUploading] = useState(false);
 
-            const handleImageUpload = (e) => {
+            const handleImageUpload = async (e) => {
                 const files = Array.from(e.target.files);
-                files.forEach(file => {
+                setUploading(true);
+                
+                for (const file of files) {
                     if (file.type.startsWith('image/')) {
                         const reader = new FileReader();
-                        reader.onload = (event) => {
-                            const newImages = [...(teamImages || []), event.target.result];
-                            setTeamImages(newImages);
+                        reader.onload = async (event) => {
+                            try {
+                                // GoogleDriveにアップロード
+                                const response = await fetch(SCRIPT_URL, {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                        action: 'uploadImage',
+                                        imageData: event.target.result,
+                                        fileName: file.name,
+                                        formationName: formationName || '未設定編成',
+                                        teamType: teamType,
+                                        teamIndex: teamIndex
+                                    })
+                                });
+                                
+                                const result = await response.json();
+                                
+                                if (result.success) {
+                                    const newImages = [...(teamImages || []), {
+                                        fileId: result.fileId,
+                                        fileUrl: result.fileUrl,
+                                        thumbnailUrl: result.thumbnailUrl,
+                                        fileName: file.name
+                                    }];
+                                    setTeamImages(newImages);
+                                } else {
+                                    alert('アップロードエラー: ' + result.message);
+                                }
+                            } catch (error) {
+                                console.error('アップロードエラー:', error);
+                                alert('アップロードに失敗しました');
+                            }
                         };
                         reader.readAsDataURL(file);
                     }
-                });
+                }
+                
                 e.target.value = '';
+                setUploading(false);
             };
 
-            const removeImage = (index) => {
-                const newImages = (teamImages || []).filter((_, i) => i !== index);
+            const removeImage = async (index) => {
+                const imageToRemove = teamImages[index];
+                
+                // 新形式（GoogleDrive）の場合は削除APIを呼び出し
+                if (imageToRemove.fileId) {
+                    try {
+                        await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: 'deleteImage',
+                                fileId: imageToRemove.fileId
+                            })
+                        });
+                    } catch (error) {
+                        console.error('削除エラー:', error);
+                    }
+                }
+                
+                const newImages = teamImages.filter((_, i) => i !== index);
                 setTeamImages(newImages);
             };
 
             return (
                 <div className="image-upload-section">
-                    <div className="image-upload-title">参考画像</div>
+                    <div className="image-upload-title">参考画像 {uploading && '(アップロード中...)'}</div>
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -664,10 +715,12 @@
                         multiple
                         className="image-upload-input"
                         onChange={handleImageUpload}
+                        disabled={uploading}
                     />
                     <button
                         className="image-upload-btn"
                         onClick={() => fileInputRef.current.click()}
+                        disabled={uploading}
                     >
                         📷 画像を追加
                     </button>
@@ -676,9 +729,9 @@
                             {teamImages.map((img, index) => (
                                 <div key={index} className="image-preview-item">
                                     <img
-                                        src={img}
+                                        src={img.thumbnailUrl || img}
                                         className="image-preview-img"
-                                        onClick={() => setImageModalSrc(img)}
+                                        onClick={() => setImageModalSrc(img.fileUrl || img)}
                                     />
                                     <button
                                         className="image-remove-btn"
@@ -703,6 +756,7 @@
         }
 
         function Teams({ teams, setTeams, title, commanders, strategies, tactics, validateStrategy, getCommanderUsageMap, moveTeam, formationName }) {
+            const teamType = title.includes('対人戦') ? 'pvp' : 'siege';
             const updateTeam = (teamIndex, field, value) => {
                 const updated = [...teams];
                 updated[teamIndex] = { ...updated[teamIndex], [field]: value };
@@ -807,6 +861,7 @@
                                     teamImages={team.images}
                                     setTeamImages={(images) => setTeamImages(teamIndex, images)}
                                     teamIndex={teamIndex}
+                                    teamType={teamType}
                                     formationName={formationName}
                                 />
                             </div>
@@ -908,7 +963,7 @@
                                                 {team.images && team.images.length > 0 && (
                                                     <div className="mini-images">
                                                         {team.images.map((img, imgIndex) => (
-                                                            <img key={imgIndex} src={img} className="mini-image-thumb" onClick={() => setImageModalSrc(img)} />
+                                                            <img key={imgIndex} src={img.thumbnailUrl || img} className="mini-image-thumb" onClick={() => setImageModalSrc(img.fileUrl || img)} />
                                                         ))}
                                                     </div>
                                                 )}
@@ -944,7 +999,7 @@
                                                 {team.images && team.images.length > 0 && (
                                                     <div className="mini-images">
                                                         {team.images.map((img, imgIndex) => (
-                                                            <img key={imgIndex} src={img} className="mini-image-thumb" onClick={() => setImageModalSrc(img)} />
+                                                            <img key={imgIndex} src={img.thumbnailUrl || img} className="mini-image-thumb" onClick={() => setImageModalSrc(img.fileUrl || img)} />
                                                         ))}
                                                     </div>
                                                 )}
