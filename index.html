@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>三国志新戦 部隊編成ツール v3.2</title>
+    <title>三国志新戦 部隊編成ツール v3.3</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -18,6 +18,8 @@
         .header p { font-size: 13px; opacity: 0.95; }
         .sync-status { margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
         .sync-btn { background: rgba(255,255,255,0.3); border: none; color: white; padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: auto; }
+        .storage-info { background: rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 4px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
+        .download-json-btn { background: rgba(255,255,255,0.3); border: none; color: white; padding: 4px 10px; border-radius: 3px; font-size: 11px; cursor: pointer; }
         .tabs { display: flex; background: #f8f9fa; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid #dee2e6; position: sticky; top: 107px; z-index: 99; }
         .tab { flex: 1; min-width: 80px; padding: 14px 8px; text-align: center; background: #f8f9fa; border: none; font-size: 14px; font-weight: 600; color: #6c757d; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
         .tab.active { background: white; color: #8e44ad; border-bottom: 3px solid #8e44ad; }
@@ -40,8 +42,11 @@
         .soldier-type-btn { flex: 1; min-width: 60px; padding: 12px 8px; border: 2px solid #dee2e6; background: white; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .soldier-type-btn.active { background: #8e44ad; color: white; border-color: #8e44ad; }
         .team-grid { display: grid; gap: 16px; }
-        .team-card { background: #f8f9fa; border-radius: 12px; padding: 16px; border: 2px solid #dee2e6; }
-        .team-card h3 { font-size: 16px; color: #2c3e50; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #dee2e6; }
+        .team-card { background: #f8f9fa; border-radius: 12px; padding: 16px; border: 2px solid #dee2e6; position: relative; }
+        .team-card h3 { font-size: 16px; color: #2c3e50; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; }
+        .team-reorder-buttons { display: flex; gap: 4px; }
+        .reorder-btn { background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .reorder-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .commander-slot { margin-bottom: 12px; }
         .aptitude-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-left: 8px; }
         .aptitude-S { background: #f39c12; color: white; }
@@ -53,6 +58,14 @@
         .tactics-section { margin-top: 12px; padding: 12px; background: #fff8e1; border-radius: 6px; border: 2px solid #ffc107; }
         .tactics-title { font-size: 13px; font-weight: 700; color: #856404; margin-bottom: 8px; }
         .tactics-slot { margin-bottom: 8px; }
+        .image-upload-section { margin-top: 12px; padding: 12px; background: #e3f2fd; border-radius: 6px; border: 2px solid #2196f3; }
+        .image-upload-title { font-size: 13px; font-weight: 700; color: #1976d2; margin-bottom: 8px; }
+        .image-upload-input { display: none; }
+        .image-upload-btn { background: #2196f3; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; width: 100%; }
+        .image-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+        .image-preview-item { position: relative; }
+        .image-preview-img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; }
+        .image-remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer; }
         .strategy-warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; }
         .strategy-error { background: #f8d7da; border: 1px solid #dc3545; color: #721c24; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; }
         .strategy-info { background: #d1ecf1; border: 1px solid #17a2b8; color: #0c5460; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px; }
@@ -78,19 +91,23 @@
         .mini-team-memo { font-size: 11px; color: #2e7d32; background: #e8f5e9; padding: 4px 8px; border-radius: 3px; margin-bottom: 6px; }
         .mini-commander { font-size: 12px; color: #495057; margin-left: 8px; margin-bottom: 2px; }
         .mini-strategy, .mini-tactics { font-size: 11px; color: #6c757d; margin-left: 16px; }
+        .mini-images { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+        .mini-image-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 3px; cursor: pointer; }
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
         .loading { text-align: center; padding: 40px; color: #6c757d; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: white; border-radius: 12px; padding: 24px; max-width: 400px; width: 100%; }
+        .modal-content { background: white; border-radius: 12px; padding: 24px; max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto; }
         .modal-title { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 16px; }
         .modal-text { font-size: 14px; color: #6c757d; margin-bottom: 20px; }
         .modal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .internal-card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 12px; }
         .team-count-selector { background: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 2px solid #8e44ad; }
+        .image-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .image-modal-content { max-width: 90%; max-height: 90%; }
+        .image-modal-img { width: 100%; height: auto; max-height: 80vh; object-fit: contain; }
+        .image-modal-close { position: absolute; top: 20px; right: 20px; background: white; color: #333; border: none; padding: 10px 15px; border-radius: 4px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
-
-
 <body>
     <div id="root"></div>
     <script type="text/babel">
@@ -124,7 +141,7 @@
 
             useEffect(() => {
                 const createEmptyTeam = (soldierType) => ({
-                    soldierType, memo: '', commanders: Array(3).fill(null).map(() => ({
+                    soldierType, memo: '', images: [], commanders: Array(3).fill(null).map(() => ({
                         commanderName: '', strategies: ['', ''], tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
                     }))
                 });
@@ -133,7 +150,7 @@
 
             useEffect(() => {
                 const createEmptyTeam = (soldierType) => ({
-                    soldierType, memo: '', commanders: Array(3).fill(null).map(() => ({
+                    soldierType, memo: '', images: [], commanders: Array(3).fill(null).map(() => ({
                         commanderName: '', strategies: ['', ''], tactics: { slot1: '', slot2: '', slot3: '', slot4: '' }
                     }))
                 });
@@ -223,6 +240,17 @@
                 }
             };
 
+            // JSONダウンロード機能
+            const downloadFormationsJSON = () => {
+                const dataStr = JSON.stringify(formations, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = `formations_backup_${new Date().toISOString().split('T')[0]}.json`;
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            };
+
             useEffect(() => { loadData(); }, [loadData]);
 
             const getCommanderUsageMap = useCallback(() => {
@@ -285,6 +313,7 @@
             };
 
             const [showSaveModal, setShowSaveModal] = useState(false);
+            const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
 
             const handleSaveClick = () => {
                 if (!formationName.trim()) { alert('編成名を入力してください'); return; }
@@ -294,8 +323,16 @@
                     alert('武将の重複エラー:\n' + duplicates.map(([name, locations]) => `${name}: ${locations.join(', ')}`).join('\n'));
                     return;
                 }
-                if (editingFormationName) setShowSaveModal(true);
-                else saveAsNew();
+
+                // 同名の編成が存在するかチェック
+                const existingFormation = formations.find(f => f.name === formationName);
+                if (existingFormation && !editingFormationName) {
+                    setShowOverwriteConfirm(true);
+                } else if (editingFormationName) {
+                    setShowSaveModal(true);
+                } else {
+                    saveAsNew();
+                }
             };
 
             const saveAsNew = async () => {
@@ -316,6 +353,7 @@
                     localStorage.setItem('formations_v3', JSON.stringify(saved));
                 }
                 setShowSaveModal(false);
+                setShowOverwriteConfirm(false);
                 setEditingFormationName(null);
                 alert('新規編成として保存しました！');
             };
@@ -327,17 +365,18 @@
                     try {
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
-                            body: JSON.stringify({ action: 'update', formationName: editingFormationName, data: formationData })
+                            body: JSON.stringify({ action: 'update', formationName: editingFormationName || formationName, data: formationData })
                         });
                         setSyncStatus('保存完了');
                         await loadFormationsFromSpreadsheet();
                     } catch (error) { console.error('保存エラー:', error); setSyncStatus('保存エラー'); }
                 } else {
-                    const updated = formations.map(f => f.name === editingFormationName ? formationData : f).sort((a, b) => new Date(b.date) - new Date(a.date));
+                    const updated = formations.map(f => f.name === (editingFormationName || formationName) ? formationData : f).sort((a, b) => new Date(b.date) - new Date(a.date));
                     setFormations(updated);
                     localStorage.setItem('formations_v3', JSON.stringify(updated));
                 }
                 setShowSaveModal(false);
+                setShowOverwriteConfirm(false);
                 setEditingFormationName(null);
                 alert('編成を上書き保存しました！');
             };
@@ -388,9 +427,18 @@
                 }
             };
 
+            // 部隊の順序入れ替え
+            const moveTeam = (teams, setTeams, index, direction) => {
+                const newIndex = direction === 'up' ? index - 1 : index + 1;
+                if (newIndex < 0 || newIndex >= teams.length) return;
+                const updated = [...teams];
+                [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+                setTeams(updated);
+            };
+
             if (loading) return (
                 <div className="app-container">
-                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.2</p></div>
+                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.3</p></div>
                     <div className="loading">データを読み込み中...</div>
                 </div>
             );
@@ -399,7 +447,15 @@
                 <div className="app-container">
                     <div className="header">
                         <h1>⚔️ 三国志新戦</h1>
-                        <p>部隊編成ツール v3.2 {useSpreadsheet && '(スプレッドシート連携)'}</p>
+                        <p>部隊編成ツール v3.3</p>
+                        <div className="storage-info">
+                            💾 保存先: {useSpreadsheet ? 'スプレッドシート' : 'ローカルストレージ'}
+                            {!useSpreadsheet && (
+                                <button className="download-json-btn" onClick={downloadFormationsJSON}>
+                                    📥 JSON
+                                </button>
+                            )}
+                        </div>
                         <div className="sync-status">{syncStatus || 'スタンバイ'}<button className="sync-btn" onClick={loadData}>🔄 再読込</button></div>
                     </div>
                     <div className="tabs">
@@ -417,7 +473,7 @@
                                         {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}部隊</option>)}
                                     </select>
                                 </div>
-                                <Teams teams={pvpTeams} setTeams={setPvpTeams} title="対人戦部隊" commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} />
+                                <Teams teams={pvpTeams} setTeams={setPvpTeams} title="対人戦部隊" commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} moveTeam={moveTeam} formationName={formationName} />
                             </>
                         )}
                         {activeTab === 'siege' && (
@@ -428,7 +484,7 @@
                                         {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}部隊</option>)}
                                     </select>
                                 </div>
-                                <Teams teams={siegeTeams} setTeams={setSiegeTeams} title="攻城部隊" commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} />
+                                <Teams teams={siegeTeams} setTeams={setSiegeTeams} title="攻城部隊" commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} moveTeam={moveTeam} formationName={formationName} />
                             </>
                         )}
                         {activeTab === 'internal' && <InternalCommanders internalCommanders={internalCommanders} setInternalCommanders={setInternalCommanders} commanders={commanders} strategies={strategies} tactics={tactics} validateStrategy={validateStrategy} getCommanderUsageMap={getCommanderUsageMap} />}
@@ -461,6 +517,29 @@
                             </div>
                         </div>
                     )}
+                    {showOverwriteConfirm && (
+                        <div className="modal-overlay" onClick={() => setShowOverwriteConfirm(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">⚠️ 同名の編成が存在します</div>
+                                <div className="modal-text">
+                                    「{formationName}」という編成が既に存在します。<br/>
+                                    上書きしますか？それとも別名で保存しますか？
+                                </div>
+                                <div className="modal-buttons">
+                                    <button className="btn btn-success" onClick={saveOverwrite}>上書き保存</button>
+                                    <button className="btn btn-secondary" onClick={() => {
+                                        setShowOverwriteConfirm(false);
+                                        const newName = prompt('別の編成名を入力してください:', formationName + '_新');
+                                        if (newName) {
+                                            setFormationName(newName);
+                                            setTimeout(() => handleSaveClick(), 100);
+                                        }
+                                    }}>別名で保存</button>
+                                </div>
+                                <button className="btn btn-secondary" style={{marginTop: '10px'}} onClick={() => setShowOverwriteConfirm(false)}>キャンセル</button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -476,7 +555,10 @@
                 document.addEventListener('mousedown', handleClickOutside);
                 return () => document.removeEventListener('mousedown', handleClickOutside);
             }, []);
-            const filteredOptions = options.filter(option => renderOption(option).toLowerCase().includes(searchTerm.toLowerCase()));
+            // 部分一致検索に変更
+            const filteredOptions = options.filter(option => 
+                renderOption(option).toLowerCase().includes(searchTerm.toLowerCase())
+            );
             const selectedOption = options.find(opt => opt.name === value);
             return (
                 <div className="search-select-container" ref={containerRef}>
@@ -547,7 +629,80 @@
             );
         }
 
-        function Teams({ teams, setTeams, title, commanders, strategies, tactics, validateStrategy, getCommanderUsageMap }) {
+        // 画像アップロードコンポーネント
+        function ImageUpload({ teamImages, setTeamImages, teamIndex, formationName }) {
+            const fileInputRef = useRef(null);
+            const [imageModalSrc, setImageModalSrc] = useState(null);
+
+            const handleImageUpload = (e) => {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const newImages = [...(teamImages || []), event.target.result];
+                            setTeamImages(newImages);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                e.target.value = '';
+            };
+
+            const removeImage = (index) => {
+                const newImages = (teamImages || []).filter((_, i) => i !== index);
+                setTeamImages(newImages);
+            };
+
+            return (
+                <div className="image-upload-section">
+                    <div className="image-upload-title">参考画像</div>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="image-upload-input"
+                        onChange={handleImageUpload}
+                    />
+                    <button
+                        className="image-upload-btn"
+                        onClick={() => fileInputRef.current.click()}
+                    >
+                        📷 画像を追加
+                    </button>
+                    {teamImages && teamImages.length > 0 && (
+                        <div className="image-preview-grid">
+                            {teamImages.map((img, index) => (
+                                <div key={index} className="image-preview-item">
+                                    <img
+                                        src={img}
+                                        className="image-preview-img"
+                                        onClick={() => setImageModalSrc(img)}
+                                    />
+                                    <button
+                                        className="image-remove-btn"
+                                        onClick={() => removeImage(index)}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {imageModalSrc && (
+                        <div className="image-modal-overlay" onClick={() => setImageModalSrc(null)}>
+                            <button className="image-modal-close" onClick={() => setImageModalSrc(null)}>✕ 閉じる</button>
+                            <div className="image-modal-content">
+                                <img src={imageModalSrc} className="image-modal-img" />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function Teams({ teams, setTeams, title, commanders, strategies, tactics, validateStrategy, getCommanderUsageMap, moveTeam, formationName }) {
             const updateTeam = (teamIndex, field, value) => {
                 const updated = [...teams];
                 updated[teamIndex] = { ...updated[teamIndex], [field]: value };
@@ -568,6 +723,11 @@
                 updated[teamIndex].commanders[commanderIndex].tactics = tacticsData;
                 setTeams(updated);
             };
+            const setTeamImages = (teamIndex, images) => {
+                const updated = [...teams];
+                updated[teamIndex].images = images;
+                setTeams(updated);
+            };
             const usageMap = getCommanderUsageMap();
             return (
                 <div className="section">
@@ -575,7 +735,25 @@
                     <div className="team-grid">
                         {teams.map((team, teamIndex) => (
                             <div key={teamIndex} className="team-card">
-                                <h3>部隊 {teamIndex + 1}</h3>
+                                <h3>
+                                    <span>部隊 {teamIndex + 1}</span>
+                                    <div className="team-reorder-buttons">
+                                        <button
+                                            className="reorder-btn"
+                                            onClick={() => moveTeam(teams, setTeams, teamIndex, 'up')}
+                                            disabled={teamIndex === 0}
+                                        >
+                                            ↑
+                                        </button>
+                                        <button
+                                            className="reorder-btn"
+                                            onClick={() => moveTeam(teams, setTeams, teamIndex, 'down')}
+                                            disabled={teamIndex === teams.length - 1}
+                                        >
+                                            ↓
+                                        </button>
+                                    </div>
+                                </h3>
                                 <div className="input-group">
                                     <label className="input-label">兵種</label>
                                     <div className="soldier-types">
@@ -625,6 +803,12 @@
                                         <TacticsSelector tactics={tactics} commanderTactics={commander.tactics} updateTactics={(tacticsData) => updateTacticsSlot(teamIndex, commanderIndex, tacticsData)} />
                                     </div>
                                 ))}
+                                <ImageUpload
+                                    teamImages={team.images}
+                                    setTeamImages={(images) => setTeamImages(teamIndex, images)}
+                                    teamIndex={teamIndex}
+                                    formationName={formationName}
+                                />
                             </div>
                         ))}
                     </div>
@@ -685,6 +869,7 @@
 
         function SavedFormations({ formations, commanders, strategies, loadFormation, copyFormation, deleteFormation }) {
             const [openIndex, setOpenIndex] = useState(null);
+            const [imageModalSrc, setImageModalSrc] = useState(null);
             if (formations.length === 0) return (
                 <div style={{textAlign: 'center', padding: '40px', color: '#6c757d'}}>
                     <div style={{fontSize: '48px'}}>📋</div>
@@ -720,6 +905,13 @@
                                             <div key={teamIndex} className="mini-team">
                                                 <div className="mini-team-header">部隊{teamIndex + 1} [{team.soldierType}]</div>
                                                 {team.memo && <div className="mini-team-memo">💡 {team.memo}</div>}
+                                                {team.images && team.images.length > 0 && (
+                                                    <div className="mini-images">
+                                                        {team.images.map((img, imgIndex) => (
+                                                            <img key={imgIndex} src={img} className="mini-image-thumb" onClick={() => setImageModalSrc(img)} />
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 {team.commanders.map((commander, cmdIndex) => {
                                                     if (!commander.commanderName) return null;
                                                     const apt = getAptitude(commander.commanderName, team.soldierType);
@@ -749,6 +941,13 @@
                                             <div key={teamIndex} className="mini-team">
                                                 <div className="mini-team-header">攻城{teamIndex + 1} [兵器]</div>
                                                 {team.memo && <div className="mini-team-memo">💡 {team.memo}</div>}
+                                                {team.images && team.images.length > 0 && (
+                                                    <div className="mini-images">
+                                                        {team.images.map((img, imgIndex) => (
+                                                            <img key={imgIndex} src={img} className="mini-image-thumb" onClick={() => setImageModalSrc(img)} />
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 {team.commanders.map((commander, cmdIndex) => {
                                                     if (!commander.commanderName) return null;
                                                     const apt = getAptitude(commander.commanderName, '兵器');
@@ -791,7 +990,7 @@
                                         <div style={{color: '#adb5bd', fontSize: '13px'}}>未設定</div>
                                     )}
                                 </div>
-                                <div className="action-buttons" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
+                                <div className="action-buttons">
                                     <button className="btn" onClick={() => loadFormation(formation)}>📝 編集</button>
                                     <button className="btn btn-secondary" onClick={() => copyFormation(formation)}>📋 コピー</button>
                                     <button className="btn btn-danger" onClick={() => deleteFormation(formation)}>🗑️ 削除</button>
@@ -799,6 +998,14 @@
                             </div>
                         </div>
                     ))}
+                    {imageModalSrc && (
+                        <div className="image-modal-overlay" onClick={() => setImageModalSrc(null)}>
+                            <button className="image-modal-close" onClick={() => setImageModalSrc(null)}>✕ 閉じる</button>
+                            <div className="image-modal-content">
+                                <img src={imageModalSrc} className="image-modal-img" />
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
