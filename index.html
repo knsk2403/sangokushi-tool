@@ -856,49 +856,6 @@
                                 <img src={imageModalSrc} className="image-modal-img" />
                             </div>
                         </div>
-                    )}</div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="image-upload-input"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                    />
-                    <button
-                        className="image-upload-btn"
-                        onClick={() => fileInputRef.current.click()}
-                        disabled={uploading}
-                    >
-                        📷 画像を追加
-                    </button>
-                    {teamImages && teamImages.length > 0 && (
-                        <div className="image-preview-grid">
-                            {teamImages.map((img, index) => (
-                                <div key={index} className="image-preview-item">
-                                    <img
-                                        src={img.thumbnailUrl || img}
-                                        className="image-preview-img"
-                                        onClick={() => setImageModalSrc(img.fileUrl || img)}
-                                    />
-                                    <button
-                                        className="image-remove-btn"
-                                        onClick={() => removeImage(index)}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {imageModalSrc && (
-                        <div className="image-modal-overlay" onClick={() => setImageModalSrc(null)}>
-                            <button className="image-modal-close" onClick={() => setImageModalSrc(null)}>✕ 閉じる</button>
-                            <div className="image-modal-content">
-                                <img src={imageModalSrc} className="image-modal-img" />
-                            </div>
-                        </div>
                     )}
                 </div>
             );
