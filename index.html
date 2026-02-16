@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>三国志新戦 部隊編成ツール v3.5</title>
+    <title>三国志新戦 部隊編成ツール v3.6</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -443,7 +443,7 @@
 
             if (loading) return (
                 <div className="app-container">
-                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.5</p></div>
+                    <div className="header"><h1>⚔️ 三国志新戦</h1><p>部隊編成ツール v3.6</p></div>
                     <div className="loading">データを読み込み中...</div>
                 </div>
             );
@@ -452,7 +452,7 @@
                 <div className="app-container">
                     <div className="header">
                         <h1>⚔️ 三国志新戦</h1>
-                        <p>部隊編成ツール v3.5</p>
+                        <p>部隊編成ツール v3.6</p>
                         <div className="storage-info">
                             💾 保存先: {useSpreadsheet ? 'スプレッドシート' : 'ローカルストレージ'}
                             {!useSpreadsheet && (
@@ -709,6 +709,7 @@
                 setUploadProgress({ current: 0, total: files.length });
                 
                 let uploadedCount = 0;
+                const uploadedImages = []; // アップロード済み画像を溜める配列
                 
                 for (const file of files) {
                     if (file.type.startsWith('image/')) {
@@ -739,13 +740,13 @@
                             const result = await response.json();
                             
                             if (result.success) {
-                                const newImages = [...(teamImages || []), {
+                                // 配列に追加
+                                uploadedImages.push({
                                     fileId: result.fileId,
                                     fileUrl: result.fileUrl,
                                     thumbnailUrl: result.thumbnailUrl,
                                     fileName: file.name
-                                }];
-                                setTeamImages(newImages);
+                                });
                                 uploadedCount++;
                                 setUploadProgress({ current: uploadedCount, total: files.length });
                             } else {
@@ -756,6 +757,18 @@
                             alert(`${file.name}: 処理に失敗しました`);
                         }
                     }
+                }
+                
+                // 全てアップロード完了後に一括でstateを更新
+                if (uploadedImages.length > 0) {
+                    const newImages = [...(teamImages || []), ...uploadedImages];
+                    console.log('アップロード完了:', {
+                        既存: teamImages?.length || 0,
+                        新規: uploadedImages.length,
+                        合計: newImages.length,
+                        データ: newImages
+                    });
+                    setTeamImages(newImages);
                 }
                 
                 e.target.value = '';
@@ -792,6 +805,9 @@
                     <div className="image-upload-title">
                         参考画像
                         {uploading && ` (${uploadProgress.current}/${uploadProgress.total})`}
+                    </div>
+                    <div style={{fontSize: '10px', color: '#856404', background: '#fff3cd', padding: '6px', borderRadius: '4px', marginBottom: '8px'}}>
+                        💡 画像は即座にGoogleDriveに保存されます。編成を保存しなくてもDriveには残ります。
                     </div>
                     <input
                         ref={fileInputRef}
@@ -831,23 +847,35 @@
                     )}
                     
                     {teamImages && teamImages.length > 0 && (
-                        <div className="image-preview-grid">
-                            {teamImages.map((img, index) => (
-                                <div key={index} className="image-preview-item">
-                                    <img
-                                        src={img.thumbnailUrl || img}
-                                        className="image-preview-img"
-                                        onClick={() => setImageModalSrc(img.fileUrl || img)}
-                                    />
-                                    <button
-                                        className="image-remove-btn"
-                                        onClick={() => removeImage(index)}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                        <>
+                            <div style={{fontSize: '11px', color: '#666', marginTop: '8px', marginBottom: '4px'}}>
+                                画像 {teamImages.length}枚
+                            </div>
+                            <div className="image-preview-grid">
+                                {teamImages.map((img, index) => (
+                                    <div key={index} className="image-preview-item">
+                                        <img
+                                            src={img.thumbnailUrl || img}
+                                            className="image-preview-img"
+                                            onClick={() => {
+                                                console.log('画像クリック:', img);
+                                                setImageModalSrc(img.fileUrl || img);
+                                            }}
+                                            onError={(e) => {
+                                                console.error('サムネイル読み込みエラー:', img);
+                                                e.target.style.border = '2px solid red';
+                                            }}
+                                        />
+                                        <button
+                                            className="image-remove-btn"
+                                            onClick={() => removeImage(index)}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
                     )}
                     {imageModalSrc && (
                         <div className="image-modal-overlay" onClick={() => setImageModalSrc(null)}>
